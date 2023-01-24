@@ -4,49 +4,55 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"io/fs"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/edsrzf/mmap-go"
 )
 
+func removeFile(s string) {
+	e := os.Remove(s)
+	if e != nil {
+		log.Fatal(e)
+	}
+}
+
+func removeNFilesStarting(start string, n int) {
+
+	for i := 0; i < n; i++ {
+		removeFile(start)
+		start = nextSegmentString(start)
+	}
+}
+
 func deleteLog(n int) {
-	//firstReplace := "wal" + (string)(n+1) + ".txt"
 	current := startFile
 	f, err := os.OpenFile(current, os.O_RDWR, 0777)
 	if err != nil {
-		fmt.Println("Nema vise postojecih fajlova za brisanje.")
+		fmt.Println("Prvi fajl je prazan.") //ako ne mozemo da otvorimo prvi log jer ne postoji izlazimo iz brisanja
 		return
 	}
 
-	err = f.Truncate(0)
+	err = f.Truncate(0) //ako nije praznimo ga
 	if err != nil {
 		log.Fatal(err)
 	}
-	var info fs.FileInfo
-	next := nextSegment(*f)
+
+	next := nextSegment(*f) //odredjujemo sledeci fajl
 	f.Close()
 
-	for i := 1; i < n; i++ {
+	for i := 1; i < n; i++ { // prvih n fajlova praznimo
 		f, err = os.OpenFile(next, os.O_RDWR, 0777)
-		if err != nil {
-			fmt.Println("Nema vise postojecih fajlova za brisanje.")
+		if err != nil { //ako neki i-ti fajl ne mozemo da otvorimo znaci da nema dovoljno fajlova za brisanje i mozemo da removujemo prvih i fajlova
+			removeNFilesStarting(startFile, i)
+			fmt.Println("Prekoracili smo fajlove za brisanje.")
 			return
 		}
 
-		info, err = f.Stat()
-		if err != nil {
-			fmt.Println("Greska sa ucitavanjem stata.")
-			log.Fatal(err)
-		}
-		if info.Size() == 0 {
-			fmt.Println("Dosli smo do prvog praznog fajla.")
-			return
-		}
-
-		err = f.Truncate(0)
+		err = f.Truncate(0) // praznimo fajl i prelazimo na sledeci
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -54,27 +60,20 @@ func deleteLog(n int) {
 		f.Close()
 	}
 
+	numOfRewritens := 0 //ovde pratimo koliko prvih fajlova smo popunili podacima iz kasnijih
+
 	for true {
 		f, err = os.OpenFile(next, os.O_RDWR, 0777)
-		if err != nil {
+		if err != nil { //ako nema vise fajlova za otvaranje brisemo od zadnjeg dodatog + 1 do zadnjeg fajla kojeg imamo
 			fmt.Println("Prepisali smo sve fajlove")
+			removeNFilesStarting(current, n)
 			return
 		}
 
-		info, err = f.Stat()
-		if err != nil {
-			fmt.Println("Greska sa ucitavanjem stata.")
-			log.Fatal(err)
-		}
-
-		if info.Size() == 0 {
-			fmt.Println("Dosli smo do prvog praznog fajla.")
-			return
-		}
-		var ret [][]byte
+		var ret [][]byte // ako smo ga otvorili uzimamo njegove podatke
 		ret = readSegment(ret, *f)
 		for i := 0; i < len(ret); i++ {
-			writeSegment(ret[i], current)
+			writeSegment(ret[i], current) //upisujemo ga u prvi prazan
 		}
 
 		err = f.Truncate(0)
@@ -84,6 +83,7 @@ func deleteLog(n int) {
 		next = nextSegment(*f)
 		current = nextSegmentString(current)
 		f.Close()
+		numOfRewritens += 1
 	}
 }
 
@@ -177,12 +177,13 @@ func readLog() [][]byte {
 }
 
 func nextSegmentString(current string) string {
-	num := 0
-	for i := 3; i < len(current) && current[i] != '.'; i++ {
-		num += num*10 + (int)(current[i])
+
+	num, er := strconv.Atoi(current[3:strings.Index(current, ".")])
+	if er != nil {
+		log.Fatal(er)
 	}
 	num += 1
-	return "wal" + (string)(num) + ".txt"
+	return "wal" + strconv.Itoa(num) + ".txt"
 }
 
 func nextSegment(f os.File) string {
@@ -191,12 +192,14 @@ func nextSegment(f os.File) string {
 		log.Fatal(err)
 	}
 	name := info.Name()
-	num := 0
-	for i := 3; i < len(name) && name[i] != '.'; i++ {
-		num += num*10 + (int)(name[i])
+
+	num, er := strconv.Atoi(name[3:strings.Index(name, ".")])
+	if er != nil {
+		log.Fatal(er)
 	}
+
 	num += 1
-	return "wal" + (string)(num) + ".txt"
+	return "wal" + strconv.Itoa(num) + ".txt"
 }
 
 func addLog(key string, value []byte, t byte, fileName string) {
@@ -271,6 +274,7 @@ var startFile string = "wal1.txt"
 var size_wala int = 3
 
 func main() {
+
 	// addLog("bababoi", []byte("xbov<<<popovic"), 1, startFile)
 	// addLog("nibba", []byte("JoeBidenWakeUp"), 0, startFile)
 	// addLog("ker", []byte("bajajajajaj"), 1, startFile)
@@ -292,6 +296,6 @@ func main() {
 	// 	fmt.Println(x[i])
 	// 	fmt.Println(len(x[i]))
 	// }
-	// deleteLog(3)
+	// deleteLog(10)
 
 }
