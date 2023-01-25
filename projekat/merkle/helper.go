@@ -30,9 +30,7 @@ func Hash(data []byte) [20]byte {
 
 func listovi(list []string) []*Node {
 
-	//var hesirani [][20]byte
 	var cvorovi []*Node
-	//var cvorovi2 []Node
 
 	for _, kljucevi := range list {
 		var hes = Hash([]byte(kljucevi))
@@ -69,9 +67,11 @@ func formiraj_stablo(listovi []*Node) *Node {
 
 }
 
-func obilazak_stabla(pocetak *Node) {
+func obilazak_stabla(pocetak *Node) [][]byte {
 
 	var cvorovi []*Node
+	var svi_hesevi [][]byte
+
 	cvorovi = append(cvorovi, pocetak)
 
 	for len(cvorovi) > 0 {
@@ -82,11 +82,20 @@ func obilazak_stabla(pocetak *Node) {
 
 		if cvor.left != nil {
 			cvorovi = append(cvorovi, cvor.left)
+			svi_hesevi = append(svi_hesevi, cvor.left.data)
 		}
 		if cvor.right != nil {
 			cvorovi = append(cvorovi, cvor.right)
+			svi_hesevi = append(svi_hesevi, cvor.right.data)
 		}
 	}
+
+	return svi_hesevi
+
+}
+
+func serijalizacija(hesevi [][]byte) {
+
 }
 
 func main() {
@@ -95,7 +104,6 @@ func main() {
 
 	var ms = new(MerkleRoot)
 	ms.root = formiraj_stablo(listovi(kljucevi))
-	//fmt.Println(listovi(kljucevi))
-	obilazak_stabla(ms.root)
+	fmt.Println((obilazak_stabla(ms.root)))
 
 }
