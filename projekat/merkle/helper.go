@@ -30,25 +30,14 @@ func Hash(data []byte) [20]byte {
 
 func listovi(list []string) []*Node {
 
-	var hesirani [][20]byte
+	//var hesirani [][20]byte
 	var cvorovi []*Node
+	//var cvorovi2 []Node
 
 	for _, kljucevi := range list {
-		hesirani = append(hesirani, Hash([]byte(kljucevi)))
-	}
-
-	for _, hes := range hesirani {
-
+		var hes = Hash([]byte(kljucevi))
 		cvorovi = append(cvorovi, &Node{
 			data:  hes[:],
-			left:  nil,
-			right: nil,
-		})
-	}
-
-	if len(cvorovi)%2 == 1 {
-		cvorovi = append(cvorovi, &Node{
-			data:  []byte{},
 			left:  nil,
 			right: nil,
 		})
@@ -62,6 +51,9 @@ func formiraj_stablo(listovi []*Node) *Node {
 	if len(listovi) == 1 {
 		return listovi[0]
 	}
+	if len(listovi)%2 == 1 {
+		listovi = append(listovi, &Node{data: []byte{}, left: nil, right: nil})
+	}
 
 	var roditelji []*Node
 
@@ -70,37 +62,40 @@ func formiraj_stablo(listovi []*Node) *Node {
 		var hes = append(listovi[i].data, listovi[i+1].data...)
 		var hes2 = Hash(hes)
 
-		roditelji = append(roditelji, &Node{
-			data:  hes2[:],
-			left:  listovi[i],
-			right: listovi[i+1],
-		})
+		roditelji = append(roditelji, &Node{data: hes2[:], left: listovi[i], right: listovi[i+1]})
 	}
 
 	return formiraj_stablo(roditelji)
 
 }
 
-func obilazak(koren *Node) {
+func obilazak_stabla(pocetak *Node) {
 
-	if koren.left == nil || koren.right == nil {
-		return
-	} else {
-		fmt.Println(koren.left.String())
-		fmt.Println(koren.right.String())
+	var cvorovi []*Node
+	cvorovi = append(cvorovi, pocetak)
+
+	for len(cvorovi) > 0 {
+		cvor := cvorovi[0]
+		cvorovi = cvorovi[1:]
+
+		fmt.Println(cvor.String())
+
+		if cvor.left != nil {
+			cvorovi = append(cvorovi, cvor.left)
+		}
+		if cvor.right != nil {
+			cvorovi = append(cvorovi, cvor.right)
+		}
 	}
-
-	obilazak(koren.left)
-	obilazak(koren.right)
-
 }
 
 func main() {
 
-	var kljucevi = []string{"abc", "asd", "bcd", "asc"}
+	var kljucevi = []string{"a", "b", "c", "d"}
 
 	var ms = new(MerkleRoot)
 	ms.root = formiraj_stablo(listovi(kljucevi))
-	obilazak(ms.root)
+	//fmt.Println(listovi(kljucevi))
+	obilazak_stabla(ms.root)
 
 }
