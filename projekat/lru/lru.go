@@ -57,11 +57,13 @@ func main() {
 	lru_cache.dodaj("5", []byte("vr5"))
 	lru_cache.dodaj("6", []byte("vr6"))
 	lru_cache.dodaj("7", []byte("vr7"))
+	lru_cache.citaj("3")
+	lru_cache.dodaj("8", []byte("vr8"))
 
-	if lru_cache.citaj("7") == nil {
+	if lru_cache.citaj("3") == nil {
 		fmt.Println("Ne postoji")
 	} else {
-		fmt.Println(string(lru_cache.citaj("7")))
+		fmt.Println(string(lru_cache.citaj("3")))
 	}
 
 }
