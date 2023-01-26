@@ -18,9 +18,9 @@ type Element struct {
 
 func (lru *LRUCache) dodaj(kljuc string, vrednost []byte) {
 
-	if vr, ima := lru.hash_mapa[kljuc]; ima {
-		lru.korisceni.MoveToFront(vr)
-		lru.hash_mapa[kljuc].Value.(*Element).vrednost = vrednost
+	if el, ima := lru.hash_mapa[kljuc]; ima {
+		lru.korisceni.MoveToFront(el)
+		el.Value.(*Element).vrednost = vrednost
 	} else {
 
 		kljuc_vr := &Element{kljuc: kljuc, vrednost: vrednost}
@@ -36,10 +36,10 @@ func (lru *LRUCache) dodaj(kljuc string, vrednost []byte) {
 
 func (lru *LRUCache) citaj(kljuc string) []byte {
 
-	if vr, ima := lru.hash_mapa[kljuc]; ima {
+	if el, ima := lru.hash_mapa[kljuc]; ima {
 
-		lru.korisceni.MoveToFront(vr)
-		return lru.hash_mapa[kljuc].Value.(*Element).vrednost
+		lru.korisceni.MoveToFront(el)
+		return el.Value.(*Element).vrednost
 
 	} else {
 		return nil
@@ -59,6 +59,7 @@ func main() {
 	lru_cache.dodaj("7", []byte("vr7"))
 	lru_cache.citaj("3")
 	lru_cache.dodaj("8", []byte("vr8"))
+	lru_cache.dodaj("5", []byte("vr15"))
 
 	if lru_cache.citaj("3") == nil {
 		fmt.Println("Ne postoji")
