@@ -24,6 +24,7 @@ func napraviHLL(p1 uint8) *HLL {
 	p.reg = make([]uint8, p.m)
 	return p
 }
+
 func (hll *HLL) add(data []byte) {
 	br := &HashWithSeed{}
 	data1 := br.Hash(data)
@@ -34,6 +35,7 @@ func (hll *HLL) add(data []byte) {
 		hll.reg[prvecifre] = uint8(brnula)
 	}
 }
+
 func (hll *HLL) Estimate() float64 {
 	sum := 0.0
 	for _, val := range hll.reg {
@@ -62,6 +64,7 @@ func (hll *HLL) emptyCount() int {
 	}
 	return sum
 }
+
 func main() {
 
 	hajper := napraviHLL(4)
@@ -76,4 +79,5 @@ func main() {
 	hajper.add([]byte("dasdas"))
 	hajper.add([]byte("dasdas"))
 	fmt.Println(hajper.Estimate())
+	fmt.Println(hajper.reg)
 }
