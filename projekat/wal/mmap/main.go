@@ -13,6 +13,49 @@ import (
 	"github.com/edsrzf/mmap-go"
 )
 
+type Podatak struct {
+	key       string
+	value     []byte
+	tombstone byte
+	timestamp int64
+}
+
+func (data *Podatak) printData() {
+	fmt.Print("Key : " + data.key + " ; Value : " + string(data.value) + " | Timestamp : ")
+	fmt.Print(data.timestamp)
+	fmt.Print(" | Tombstone : ")
+	fmt.Println(data.tombstone)
+}
+
+func (data *Podatak) decodeToByte() []byte {
+	upis := make([]byte, 29+(int64)(len(data.key))+(int64)(len(data.value)))
+
+	b := make([]byte, TIMESTAMP_SIZE) //pretvaranje timestampa u niz bita
+	binary.LittleEndian.PutUint64(b, (uint64)(data.timestamp))
+	copy(upis[TIMESTAMP_START:], b)
+
+	c := make([]byte, TOMBSTONE_SIZE) //tombstone
+	c[0] = data.tombstone
+	copy(upis[TOMBSTONE_START:], c)
+
+	d := make([]byte, KEY_SIZE_SIZE)
+	binary.LittleEndian.PutUint64(d, (uint64)(len(data.key))) //duzina kljuca
+	copy(upis[KEY_SIZE_START:], d)
+
+	e := make([]byte, VALUE_SIZE_SIZE)
+	binary.LittleEndian.PutUint64(e, (uint64)(len(data.value))) //duzina vrednosti
+	copy(upis[VALUE_SIZE_START:], e)
+
+	copy(upis[KEY_START:], []byte(data.key))         //kljuc
+	copy(upis[KEY_START+len(data.key):], data.value) //value
+
+	a := make([]byte, CRC_SIZE)
+	binary.LittleEndian.PutUint32(a, CRC32(upis[TIMESTAMP_START:KEY_START+len(data.key)+len(data.value)])) //crc
+	copy(upis[CRC_START:], a)
+	return upis
+}
+
+// brise fajl za zadati path fajla
 func removeFile(s string) {
 	e := os.Remove(s)
 	if e != nil {
@@ -20,14 +63,16 @@ func removeFile(s string) {
 	}
 }
 
+// brise n fajlova pocevsi od prvog zadatog
 func removeNFilesStarting(start string, n int) {
 
 	for i := 0; i < n; i++ {
 		removeFile(start)
-		start = nextSegmentString(start)
+		start = nextFileString(start)
 	}
 }
 
+// brise prvih n walova
 func deleteLog(n int) {
 	current := startFile
 	f, err := os.OpenFile(current, os.O_RDWR, 0777)
@@ -41,7 +86,7 @@ func deleteLog(n int) {
 		log.Fatal(err)
 	}
 
-	next := nextSegment(*f) //odredjujemo sledeci fajl
+	next := nextFile(*f) //odredjujemo sledeci fajl
 	f.Close()
 
 	for i := 1; i < n; i++ { // prvih n fajlova praznimo
@@ -56,7 +101,7 @@ func deleteLog(n int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		next = nextSegment(*f)
+		next = nextFile(*f)
 		f.Close()
 	}
 
@@ -80,13 +125,14 @@ func deleteLog(n int) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		next = nextSegment(*f)
-		current = nextSegmentString(current)
+		next = nextFile(*f)
+		current = nextFileString(current)
 		f.Close()
 		numOfRewritens += 1
 	}
 }
 
+// zapisuje niz bitova u fajl
 func writeSegment(ret []byte, name string) {
 	f, err := os.OpenFile(name, os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
@@ -112,17 +158,19 @@ func writeSegment(ret []byte, name string) {
 	mmapFile.Unmap()
 }
 
+// nalazi jedan element wala od date pozicije
 func findSegment(start int64, log []byte) []byte {
-	keysize := log[start+KEY_SIZE_START : start+KEY_SIZE_START+8]
+	keysize := log[start+KEY_SIZE_START : start+KEY_SIZE_START+KEY_SIZE_SIZE]
 	k := binary.LittleEndian.Uint64(keysize)
 	//fmt.Println("Key size: " + (string)(k))
-	valuesize := log[start+VALUE_SIZE_START : start+VALUE_SIZE_START+8]
+	valuesize := log[start+VALUE_SIZE_START : start+VALUE_SIZE_START+VALUE_SIZE_SIZE]
 	v := binary.LittleEndian.Uint64(valuesize)
 	//fmt.Println("Value size: " + (string)(v))
 	segment := log[start : start+29+(int64)(k+v)]
 	return segment
 }
 
+// za zadati fajl i niz bita apendovace na niz bita svaki element wala iz tog fajla
 func readSegment(ret [][]byte, f os.File) [][]byte {
 	log, er := io.ReadAll(&f)
 	if er != nil {
@@ -130,14 +178,14 @@ func readSegment(ret [][]byte, f os.File) [][]byte {
 		panic(er)
 	}
 	var start int64 = 0
-	for i := 0; start < (int64)(len(log)) && i < size_wala; i++ {
-		ret = append(ret, findSegment(start, log))
-		start += int64(len(ret[len(ret)-1]))
-		//fmt.Println(ret[len(ret)-1])
+	for i := 0; start < (int64)(len(log)) && i < size_wala; i++ { //ucitavamo segmenat po segmenat
+		ret = append(ret, findSegment(start, log)) //find segment ce nam vratiti niz bita za sledeci segmenat od neke pozicije
+		start += int64(len(ret[len(ret)-1]))       //povecavama start za  broj bita koje smo ucitali kao sledeci segment
 	}
 	return ret
 }
 
+// cita wal i vraca niz nizova bita gde svaki niz predstavlja neki element wala, oni se mogu dekodirati funkcijum encode to data da bi postali objekti Podatak
 func readLog() [][]byte {
 
 	var ret [][]byte
@@ -156,7 +204,7 @@ func readLog() [][]byte {
 
 	for info.Size() != 0 {
 		ret = readSegment(ret, *f)
-		name := nextSegment(*f)
+		name := nextFile(*f)
 		f.Close()
 		f, err = os.OpenFile(name, os.O_RDWR, 0777)
 		if err != nil {
@@ -173,10 +221,13 @@ func readLog() [][]byte {
 			break
 		}
 	}
+	f.Close()
+
 	return ret
 }
 
-func nextSegmentString(current string) string {
+// vraca ime sledeceg fajla za zadato ime trenutnog fajla
+func nextFileString(current string) string {
 
 	num, er := strconv.Atoi(current[3:strings.Index(current, ".")])
 	if er != nil {
@@ -186,7 +237,8 @@ func nextSegmentString(current string) string {
 	return "wal" + strconv.Itoa(num) + ".txt"
 }
 
-func nextSegment(f os.File) string {
+// vraca ime sledeceg fajla za zadat otvoreni fajl
+func nextFile(f os.File) string {
 	info, err := f.Stat()
 	if err != nil {
 		log.Fatal(err)
@@ -202,9 +254,63 @@ func nextSegment(f os.File) string {
 	return "wal" + strconv.Itoa(num) + ".txt"
 }
 
+// pretvara niz bajtova u element tipa Podatak
+func encodeToData(data []byte) Podatak {
+	var ret Podatak
+	keysize := data[KEY_SIZE_START : KEY_SIZE_START+KEY_SIZE_SIZE]
+	ks := binary.LittleEndian.Uint64(keysize)
+
+	valuesize := data[VALUE_SIZE_START : VALUE_SIZE_START+VALUE_SIZE_SIZE]
+	vs := binary.LittleEndian.Uint64(valuesize)
+
+	key := data[KEY_START : KEY_START+ks]
+	ret.key = fmt.Sprintf("%s", key)
+
+	ret.value = data[KEY_START+ks : KEY_START+ks+vs]
+
+	timestamp := data[TIMESTAMP_START : TIMESTAMP_START+TIMESTAMP_SIZE]
+	ret.timestamp = int64(binary.LittleEndian.Uint64(timestamp))
+
+	tombstone := data[TOMBSTONE_START : TOMBSTONE_START+TOMBSTONE_SIZE]
+	ret.tombstone = byte(tombstone[0])
+
+	return ret
+}
+
+// pretvara kljuc vrednost i tombstone u niz bajtova i pravi im timestamp za momenat pravljenja
+func decodeToByte(key string, value []byte, t byte) []byte {
+	upis := make([]byte, 29+(int64)(len(key))+(int64)(len(value)))
+
+	b := make([]byte, TIMESTAMP_SIZE) //pretvaranje timestampa u niz bita
+	now := time.Now().Unix()
+	binary.LittleEndian.PutUint64(b, (uint64)(now))
+	copy(upis[TIMESTAMP_START:], b)
+
+	c := make([]byte, TOMBSTONE_SIZE) //tombstone
+	c[0] = t
+	copy(upis[TOMBSTONE_START:], c)
+
+	d := make([]byte, KEY_SIZE_SIZE)
+	binary.LittleEndian.PutUint64(d, (uint64)(len(key))) //duzina kljuca
+	copy(upis[KEY_SIZE_START:], d)
+
+	e := make([]byte, VALUE_SIZE_SIZE)
+	binary.LittleEndian.PutUint64(e, (uint64)(len(value))) //duzina vrednosti
+	copy(upis[VALUE_SIZE_START:], e)
+
+	copy(upis[KEY_START:], []byte(key))    //kljuc
+	copy(upis[KEY_START+len(key):], value) //value
+
+	a := make([]byte, CRC_SIZE)
+	binary.LittleEndian.PutUint32(a, CRC32(upis[TIMESTAMP_START:KEY_START+len(key)+len(value)])) //crc
+	copy(upis[CRC_START:], a)
+	return upis
+}
+
+// dodaje log
 func addLog(key string, value []byte, t byte, fileName string) {
 
-	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0777)
+	f, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0777) //otvaramo fajl
 	if err != nil {
 		fmt.Print("Greska pri otvaranju " + fileName)
 		log.Fatal(err)
@@ -216,86 +322,64 @@ func addLog(key string, value []byte, t byte, fileName string) {
 		log.Fatal(err)
 	}
 
-	start := info.Size()
+	start := info.Size() //pamtimo kraj fajla kako bi smo upisali na njega
 
 	var ret [][]byte
 	ret = readSegment(ret, *f)
 
-	if len(ret) == size_wala {
-		name := nextSegment(*f)
+	if len(ret) == size_wala { //ako je trenutni fajl popunjen
+		name := nextFile(*f) //next segment nam vraca sledeci fajl u listi valova
 		f.Close()
-		addLog(key, value, t, name)
+		addLog(key, value, t, name) //pokusavamo da dodamo element u sledeci wal
 		return
 	}
 
-	upis := make([]byte, 29+(int64)(len(key))+(int64)(len(value)))
-
-	errr := f.Truncate(start + 29 + (int64)(len(key)) + (int64)(len(value)))
+	errr := f.Truncate(start + 29 + (int64)(len(key)) + (int64)(len(value))) //postavljamo velicinu na trenutnu + dovoljno mesta za sledeci segment
 	if errr != nil {
 		log.Fatal(errr)
 	}
 
 	mmapFile, err := mmap.Map(f, mmap.RDWR, 0)
-	defer mmapFile.Unmap()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	b := make([]byte, 8)
-	now := time.Now().Unix()
-	binary.LittleEndian.PutUint64(b, (uint64)(now))
-	copy(upis[TIMESTAMP_START:], b)
-
-	c := make([]byte, 1)
-	c[0] = t
-	copy(upis[TOMBSTONE_START:], c)
-
-	d := make([]byte, 8)
-	binary.LittleEndian.PutUint64(d, (uint64)(len(key)))
-	copy(upis[KEY_SIZE_START:], d)
-
-	e := make([]byte, 8)
-	binary.LittleEndian.PutUint64(e, (uint64)(len(value)))
-	copy(upis[VALUE_SIZE_START:], e)
-
-	copy(upis[KEY_START:], []byte(key))
-	copy(upis[KEY_START+len(key):], value)
-
-	a := make([]byte, 4)
-	binary.LittleEndian.PutUint32(a, CRC32(upis[TIMESTAMP_START:KEY_START+len(key)+len(value)]))
-	copy(upis[CRC_START:], a)
+	upis := decodeToByte(key, value, t)
 
 	copy(mmapFile[start:], upis)
+	mmapFile.Unmap()
 	f.Close()
 }
 
 var startFile string = "wal1.txt"
-var size_wala int = 3
+var size_wala int = 16
 
 func main() {
 
-	// addLog("bababoi", []byte("xbov<<<popovic"), 1, startFile)
-	// addLog("nibba", []byte("JoeBidenWakeUp"), 0, startFile)
-	// addLog("ker", []byte("bajajajajaj"), 1, startFile)
-	// addLog("smer", []byte("NIggleton"), 0, startFile)
-	// addLog("bababoi", []byte("Pekka ridge spam :))"), 1, startFile)
-	// addLog("123", []byte("Kill da hoe"), 0, startFile)
-	// addLog("222", []byte("Nocturn :0"), 1, startFile)
-	// addLog("s2e44r", []byte("Dantes goat"), 0, startFile)
-	// addLog("t1212t", []byte("Messi << Ronaldino"), 1, startFile)
-	// addLog("hhhhh", []byte("Muhamad Hanakin did 9/11"), 0, startFile)
-	// addLog("asasasas", []byte("Killer Queen 3rd bomb"), 1, startFile)
-	// addLog("777", []byte("ebin gejms"), 0, startFile)
-	// addLog("989898", []byte("Venic Krvat"), 1, startFile)
-	// addLog("1skija", []byte("Nigga Balls"), 0, startFile)
-	// addLog("tum", []byte("Can I put my balls in yo jaws"), 1, startFile)
-	// addLog("u don no", []byte("Balls in yo jaws"), 0, startFile)
-	// x := readLog()
-	// for i := 0; i < len(x); i++ {
-	// 	fmt.Println(x[i])
-	// 	fmt.Println(len(x[i]))
-	// }
-	// deleteLog(10)
-
+	addLog("bababoi", []byte("xbov<<<popovic"), 1, startFile)
+	addLog("nibba", []byte("JoeBidenWakeUp"), 0, startFile)
+	addLog("ker", []byte("bajajajajaj"), 1, startFile)
+	addLog("smer", []byte("NIggleton"), 0, startFile)
+	addLog("bababoi", []byte("Pekka ridge spam :))"), 1, startFile)
+	addLog("123", []byte("Kill da hoe"), 0, startFile)
+	addLog("222", []byte("Nocturn :0"), 1, startFile)
+	addLog("s2e44r", []byte("Dantes goat"), 0, startFile)
+	addLog("t1212t", []byte("Messi << Ronaldino"), 1, startFile)
+	addLog("hhhhh", []byte("Muhamad Hanakin did 9/11"), 0, startFile)
+	addLog("asasasas", []byte("Killer Queen 3rd bomb"), 1, startFile)
+	addLog("777", []byte("ebin gejms"), 0, startFile)
+	addLog("989898", []byte("Venic Krvat"), 1, startFile)
+	addLog("1skija", []byte("Nigga Balls"), 0, startFile)
+	addLog("tum", []byte("Can I put my balls in yo jaws"), 1, startFile)
+	addLog("u don no", []byte("Balls in yo jaws"), 0, startFile)
+	var m Podatak
+	x := readLog()
+	fmt.Println("*************************************************************")
+	for i := 0; i < len(x); i++ {
+		m = encodeToData(x[i])
+		m.printData()
+		fmt.Println()
+	}
+	deleteLog(10)
 }
