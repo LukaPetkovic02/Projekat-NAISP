@@ -1,14 +1,8 @@
-package boomFilter
+package bloomFilter
 
 import (
 	"bytes"
 	"encoding/gob"
-	"fmt"
-)
-
-const (
-	BLOOM_EXCEPTED_ELEMENT    = 5
-	BLOOM_FALSE_POSITIVE_RATE = 0.01
 )
 
 type BloomFilter struct {
@@ -21,7 +15,7 @@ type BloomFilter struct {
 }
 
 // kreira novi bloom filter za ocekivani br elemenata i false positive rate
-func newBloomFilter(excepted_elements int, false_positive_rate float64) *BloomFilter {
+func NewBloomFilter(excepted_elements int, false_positive_rate float64) *BloomFilter {
 
 	bloom := new(BloomFilter)
 	bloom.m = CalculateM(excepted_elements, false_positive_rate)
@@ -35,7 +29,7 @@ func newBloomFilter(excepted_elements int, false_positive_rate float64) *BloomFi
 }
 
 // kreira bloom filter od vec zadatih podataka koji ce se ucitavati iz fajla za vec unapred napravljene bloom filtere
-func recreateBloomFilter(m uint, k uint, fns []HashWithSeed, podaci []byte) *BloomFilter {
+func RecreateBloomFilter(m uint, k uint, fns []HashWithSeed, podaci []byte) *BloomFilter {
 
 	bloom := new(BloomFilter)
 	bloom.m = m
@@ -49,7 +43,7 @@ func recreateBloomFilter(m uint, k uint, fns []HashWithSeed, podaci []byte) *Blo
 }
 
 // dodaje element u bloom filter
-func (bloom *BloomFilter) add(data []byte) {
+func (bloom *BloomFilter) Add(data []byte) {
 	var i uint64
 	for _, fn := range bloom.fns {
 		err := bloom.encoder.Encode(fn)
@@ -68,7 +62,7 @@ func (bloom *BloomFilter) add(data []byte) {
 }
 
 // pretrazuje bloom filter i govori da li element postoji ili ne, moze reci da postoji element koji ne postoji
-func (bloom *BloomFilter) search(data []byte) bool {
+func (bloom *BloomFilter) Search(data []byte) bool {
 	var i uint64
 	for _, fn := range bloom.fns {
 		err := bloom.encoder.Encode(fn)
@@ -87,14 +81,4 @@ func (bloom *BloomFilter) search(data []byte) bool {
 		}
 	}
 	return true
-}
-
-func main() {
-	bloom := newBloomFilter(5, 0.01)
-	fmt.Println(bloom.m, bloom.k)
-	fmt.Println(bloom.fns)
-	bloom.add([]byte("wasd"))
-	fmt.Println(bloom.podaci)
-	fmt.Println(bloom.search([]byte("wasd")))
-	fmt.Println(bloom.search([]byte("nesto drugo")))
 }
