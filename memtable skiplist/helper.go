@@ -15,20 +15,21 @@ type SkipList struct {
 	head         *SkipListNode
 }
 
-type SkipListNode struct {
+type SkipListNode struct { //ovo je kao Podatak samo sto jos ima i niz pokazivaca na Podatak
 	key       string
 	value     []byte
-	next      []*SkipListNode
-	tombstone bool
-	timestamp time.Time //vreme poslednje promene
+	tombstone byte
+	timestamp int64 //vreme poslednje promene
+	//treba da se uveze struct Podatak iz wala
+	next []*SkipListNode
 }
 
-func (s *SkipListNode) InitSP(key string, value []byte, level int, tomb bool, vreme time.Time) SkipListNode {
+func (s *SkipListNode) InitSP(key string, value []byte, level int, tomb byte, vreme time.Time) SkipListNode {
 	s.key = key
 	s.value = value
 	s.next = make([]*SkipListNode, level+1)
 	s.tombstone = tomb
-	s.timestamp = vreme
+	s.timestamp = vreme.Unix()
 	return *s
 }
 
@@ -63,7 +64,7 @@ func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koj
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == searchKey && !x.tombstone {
+		if x.key == searchKey && x.tombstone != 1 {
 			return x
 		}
 		for x.next[i] != nil && x.next[i].key <= searchKey {
@@ -79,7 +80,7 @@ func (s *SkipList) insert(novi string, vrednost []byte, vreme time.Time) []SkipL
 	}
 
 	var noviNode SkipListNode
-	noviNode.InitSP(novi, vrednost, s.roll(), false, vreme)
+	noviNode.InitSP(novi, vrednost, s.roll(), 0, vreme)
 	x := s.head
 	var i int
 
@@ -124,9 +125,9 @@ func (s *SkipList) put(key string, newValue []byte, vreme time.Time) { //menja v
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == key && !x.tombstone {
+		if x.key == key && x.tombstone == 0 {
 			x.value = newValue
-			x.timestamp = vreme
+			x.timestamp = vreme.Unix()
 		}
 		for x.next[i] != nil && x.next[i].key <= key {
 			x = x.next[i]
@@ -144,9 +145,9 @@ func (s *SkipList) delete(brisanje string, vreme time.Time) { //logicko brisanje
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == brisanje && !x.tombstone {
-			x.tombstone = true
-			x.timestamp = vreme
+		if x.key == brisanje && x.tombstone == 0 {
+			x.tombstone = 1
+			x.timestamp = vreme.Unix()
 		}
 		for x.next[i] != nil && x.next[i].key <= brisanje {
 			x = x.next[i]
