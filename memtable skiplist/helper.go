@@ -7,6 +7,14 @@ import (
 )
 
 // ZA SAD SAM SAMO DEO SA SKIP LISTOM URADIO, PROVERITE
+
+type Podatak struct { //ovo ce se svuda koristiti
+	key       string
+	value     []byte
+	tombstone byte
+	timestamp int64
+}
+
 type SkipList struct {
 	maxHeight    int
 	height       int
@@ -15,21 +23,23 @@ type SkipList struct {
 	head         *SkipListNode
 }
 
-type SkipListNode struct { //ovo je kao Podatak samo sto jos ima i niz pokazivaca na Podatak
-	key       string
-	value     []byte
-	tombstone byte
-	timestamp int64 //vreme poslednje promene
+type SkipListNode struct {
+	//key       string
+	//value     []byte
+	//tombstone byte
+	//timestamp int64 //vreme poslednje promene
+	podatak Podatak
 	//treba da se uveze struct Podatak iz wala
 	next []*SkipListNode
 }
 
-func (s *SkipListNode) InitSP(key string, value []byte, level int, tomb byte, vreme time.Time) SkipListNode {
-	s.key = key
-	s.value = value
+func (s *SkipListNode) InitSP(podatak Podatak, level int) SkipListNode {
+	//s.key = key
+	//s.value = value
 	s.next = make([]*SkipListNode, level+1)
-	s.tombstone = tomb
-	s.timestamp = vreme.Unix()
+	//s.tombstone = tomb
+	//s.timestamp = vreme.Unix()
+	s.podatak = podatak
 	return *s
 }
 
@@ -64,28 +74,32 @@ func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koj
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == searchKey && x.tombstone != 1 {
+		if x.podatak.key == searchKey && x.podatak.tombstone != 1 {
 			return x
 		}
-		for x.next[i] != nil && x.next[i].key <= searchKey {
+		for x.next[i] != nil && x.next[i].podatak.key <= searchKey {
 			x = x.next[i]
 		}
 	}
 	return nil
 }
 
-func (s *SkipList) insert(novi string, vrednost []byte, vreme time.Time) []SkipListNode { //dodaje novi element i vraca sortiranu listu ako je skip lista puna, inace vraca nil
+func (s *SkipList) insert(novi string, vrednost []byte, vreme time.Time) []Podatak { //dodaje novi element i vraca sortiranu listu podataka ako je skip lista puna, inace vraca nil
 	if s.search(novi) != nil {
 		return nil
 	}
-
+	var pod Podatak
+	pod.key = novi
+	pod.value = vrednost
+	pod.timestamp = vreme.Unix()
+	pod.tombstone = 0
 	var noviNode SkipListNode
-	noviNode.InitSP(novi, vrednost, s.roll(), 0, vreme)
+	noviNode.InitSP(pod, s.roll())
 	x := s.head
 	var i int
 
 	for i = len(noviNode.next) - 1; i >= 0; i-- {
-		for x.next[i] != nil && x.next[i].key < noviNode.key {
+		for x.next[i] != nil && x.next[i].podatak.key < noviNode.podatak.key {
 			x = x.next[i]
 		}
 
@@ -102,10 +116,10 @@ func (s *SkipList) insert(novi string, vrednost []byte, vreme time.Time) []SkipL
 		fmt.Println("Skip lista je popunjena!")
 		//ovde treba sortirati sve cvorove po kljucu i vratiti sortiranu listu cvorova
 		//cvorovi u skip listi su po difoltu sortirani tako da samo prolazim kroz najnizi nivo
-		sortNodeovi := []SkipListNode{}
+		sortNodeovi := []Podatak{}
 		x := s.head
 		for x != nil {
-			sortNodeovi = append(sortNodeovi, *x)
+			sortNodeovi = append(sortNodeovi, x.podatak)
 			x = x.next[0]
 		}
 		//treba isprazniti listu kada se ona popuni
@@ -125,11 +139,11 @@ func (s *SkipList) put(key string, newValue []byte, vreme time.Time) { //menja v
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == key && x.tombstone == 0 {
-			x.value = newValue
-			x.timestamp = vreme.Unix()
+		if x.podatak.key == key && x.podatak.tombstone == 0 {
+			x.podatak.value = newValue
+			x.podatak.timestamp = vreme.Unix()
 		}
-		for x.next[i] != nil && x.next[i].key <= key {
+		for x.next[i] != nil && x.next[i].podatak.key <= key {
 			x = x.next[i]
 		}
 	}
@@ -145,11 +159,11 @@ func (s *SkipList) delete(brisanje string, vreme time.Time) { //logicko brisanje
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.key == brisanje && x.tombstone == 0 {
-			x.tombstone = 1
-			x.timestamp = vreme.Unix()
+		if x.podatak.key == brisanje && x.podatak.tombstone == 0 {
+			x.podatak.tombstone = 1
+			x.podatak.timestamp = vreme.Unix()
 		}
-		for x.next[i] != nil && x.next[i].key <= brisanje {
+		for x.next[i] != nil && x.next[i].podatak.key <= brisanje {
 			x = x.next[i]
 		}
 	}
