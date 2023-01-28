@@ -1,4 +1,4 @@
-package main
+package cms
 
 import (
 	"crypto/md5"
