@@ -1,4 +1,4 @@
-package main
+package hll
 
 import (
 	"crypto/md5"

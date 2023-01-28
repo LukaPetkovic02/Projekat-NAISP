@@ -1,7 +1,6 @@
-package main
+package hll
 
 import (
-	"fmt"
 	"math"
 	"math/bits"
 )
@@ -17,7 +16,7 @@ type HLL struct {
 	reg []uint8
 }
 
-func napraviHLL(p1 uint8) *HLL {
+func MakeHLL(p1 uint8) *HLL {
 	p := new(HLL)
 	p.p = p1
 	p.m = uint64(math.Pow(2, float64(p1)))
@@ -25,7 +24,7 @@ func napraviHLL(p1 uint8) *HLL {
 	return p
 }
 
-func (hll *HLL) add(data []byte) {
+func (hll *HLL) Add(data []byte) {
 	br := &HashWithSeed{}
 	data1 := br.Hash(data)
 	prvecifre := data1 >> (64 - hll.p)
@@ -44,7 +43,7 @@ func (hll *HLL) Estimate() float64 {
 
 	alpha := 0.7213 / (1.0 + 1.079/float64(hll.m))
 	estimation := alpha * math.Pow(float64(hll.m), 2.0) / sum
-	emptyRegs := hll.emptyCount()
+	emptyRegs := hll.EmptyCount()
 	if estimation <= 2.5*float64(hll.m) { // do small range correction
 		if emptyRegs > 0 {
 			estimation = float64(hll.m) * math.Log(float64(hll.m)/float64(emptyRegs))
@@ -55,7 +54,7 @@ func (hll *HLL) Estimate() float64 {
 	return estimation
 }
 
-func (hll *HLL) emptyCount() int {
+func (hll *HLL) EmptyCount() int {
 	sum := 0
 	for _, val := range hll.reg {
 		if val == 0 {
@@ -63,21 +62,4 @@ func (hll *HLL) emptyCount() int {
 		}
 	}
 	return sum
-}
-
-func main() {
-
-	hajper := napraviHLL(4)
-	fmt.Println(hajper.Estimate())
-	hajper.add([]byte("dasdas"))
-	hajper.add([]byte("ddas"))
-	hajper.add([]byte("dasd"))
-	hajper.add([]byte("dasd3131as"))
-	hajper.add([]byte("dasdas"))
-	hajper.add([]byte("dasdas"))
-	hajper.add([]byte("dasdas"))
-	hajper.add([]byte("dasdas"))
-	hajper.add([]byte("dasdas"))
-	fmt.Println(hajper.Estimate())
-	fmt.Println(hajper.reg)
 }
