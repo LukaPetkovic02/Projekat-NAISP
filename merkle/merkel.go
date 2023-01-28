@@ -1,4 +1,4 @@
-package main
+package merkel
 
 import (
 	"crypto/sha1"
@@ -28,7 +28,7 @@ func Hash(data []byte) [20]byte {
 	return sha1.Sum(data)
 }
 
-func listovi(list []string) []*Node {
+func Listovi(list []string) []*Node {
 
 	var cvorovi []*Node
 
@@ -44,7 +44,7 @@ func listovi(list []string) []*Node {
 	return cvorovi
 }
 
-func formiraj_stablo(listovi []*Node) *Node {
+func Formiraj_stablo(listovi []*Node) *Node {
 
 	if len(listovi) == 1 {
 		return listovi[0]
@@ -63,11 +63,11 @@ func formiraj_stablo(listovi []*Node) *Node {
 		roditelji = append(roditelji, &Node{data: hes2[:], left: listovi[i], right: listovi[i+1]})
 	}
 
-	return formiraj_stablo(roditelji)
+	return Formiraj_stablo(roditelji)
 
 }
 
-func obilazak_stabla(pocetak *Node) [][]byte {
+func Obilazak_stabla(pocetak *Node) [][]byte {
 
 	var cvorovi []*Node
 	var svi_hesevi [][]byte
@@ -94,16 +94,6 @@ func obilazak_stabla(pocetak *Node) [][]byte {
 
 }
 
-func serijalizacija(hesevi [][]byte) {
-
-}
-
-func main() {
-
-	var kljucevi = []string{"a", "b", "c", "d"}
-
-	var ms = new(MerkleRoot)
-	ms.root = formiraj_stablo(listovi(kljucevi))
-	fmt.Println((obilazak_stabla(ms.root)))
+func Serijalizacija(hesevi [][]byte) {
 
 }
