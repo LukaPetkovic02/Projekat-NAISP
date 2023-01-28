@@ -1,4 +1,4 @@
-package main
+package simhash
 
 import (
 	"bufio"
@@ -24,6 +24,7 @@ func ToBinary(s string) string {
 	}
 	return res
 }
+
 func ProcitajFajl(mapa map[string]int, putanja string) {
 	file, err := os.OpenFile(putanja, os.O_RDONLY, 0666)
 	if err != nil {
@@ -83,6 +84,7 @@ func ProcitajFajl(mapa map[string]int, putanja string) {
 
 	file.Close()
 }
+
 func SimHash(mapa map[string]int) [256]int {
 	var lista [256]int
 	for i := 0; i < 256; i++ {
@@ -102,6 +104,7 @@ func SimHash(mapa map[string]int) [256]int {
 	}
 	return lista
 }
+
 func HemingvejovaUdaljenost(lista1 [256]int, lista2 [256]int) int {
 	var suma int = 0
 	for i := 0; i < len(lista1); i++ {
@@ -111,24 +114,25 @@ func HemingvejovaUdaljenost(lista1 [256]int, lista2 [256]int) int {
 	}
 	return suma
 }
-func main() {
-	fmt.Println(GetMD5Hash("hello"))           //svaki podatak pretvori u 32 hex cifre
-	fmt.Println(ToBinary(GetMD5Hash("hello"))) //ili 32*8 binarnih
-	ProcitajFajl(mapa1, "tekst1.txt")          //cita fajl i pravi mapu sa stringom i brojem njegovog ponavljanja u tekstu
-	ProcitajFajl(mapa2, "tekst2.txt")
-	lista1 := SimHash(mapa1)
-	lista2 := SimHash(mapa2)
-	//fmt.Println(lista1)
-	//fmt.Println(lista2)
-	fmt.Println("Hemingvejovo rastojanje:", HemingvejovaUdaljenost(lista1, lista2))
-	//for k, v := range mapa1 {
-	//	fmt.Print("mapa1[", k, "]=")
-	//	fmt.Println(v)
-	//}
-	//fmt.Println("-------------------------------------------------")
-	//for k, v := range mapa2 {
-	//	fmt.Print("mapa2[", k, "]=")
-	//	fmt.Println(v)
-	//}
 
-}
+// func main() {
+// 	fmt.Println(GetMD5Hash("hello"))           //svaki podatak pretvori u 32 hex cifre
+// 	fmt.Println(ToBinary(GetMD5Hash("hello"))) //ili 32*8 binarnih
+// 	ProcitajFajl(mapa1, "tekst1.txt")          //cita fajl i pravi mapu sa stringom i brojem njegovog ponavljanja u tekstu
+// 	ProcitajFajl(mapa2, "tekst2.txt")
+// 	lista1 := SimHash(mapa1)
+// 	lista2 := SimHash(mapa2)
+// 	//fmt.Println(lista1)
+// 	//fmt.Println(lista2)
+// 	fmt.Println("Hemingvejovo rastojanje:", HemingvejovaUdaljenost(lista1, lista2))
+// 	//for k, v := range mapa1 {
+// 	//	fmt.Print("mapa1[", k, "]=")
+// 	//	fmt.Println(v)
+// 	//}
+// 	//fmt.Println("-------------------------------------------------")
+// 	//for k, v := range mapa2 {
+// 	//	fmt.Print("mapa2[", k, "]=")
+// 	//	fmt.Println(v)
+// 	//}
+
+// }
