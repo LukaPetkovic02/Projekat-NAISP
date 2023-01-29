@@ -1,4 +1,4 @@
-package cms
+package countMS
 
 import (
 	"bytes"
@@ -21,6 +21,9 @@ func NewCMS(false_positive_rate float64) *CMS {
 	cms.M = CalculateMC(false_positive_rate)
 	cms.K = CalculateKC(false_positive_rate)
 	cms.Podaci = make([][]byte, cms.K)
+	for i := range cms.Podaci {
+		cms.Podaci[i] = make([]byte, cms.M)
+	}
 	cms.Fns = importi.CreateHashFunctions(cms.K)
 	var buf = &bytes.Buffer{}
 	cms.Encoder = gob.NewEncoder(buf)
