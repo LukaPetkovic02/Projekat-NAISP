@@ -3,11 +3,11 @@ package main
 import (
 	"container/list"
 	"fmt"
-	Bloom "projekat/bloomFilter"
+	"projekat/bloomFilter"
 	Btree "projekat/btree"
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
-	Lru "projekat/lru"
+	Lru "projekat/lrukesh"
 	Util "projekat/utils"
 )
 
@@ -15,7 +15,7 @@ func main() {
 	//Bloom filter testovi
 
 	fmt.Println("joe")
-	bloom := Bloom.NewBloomFilter(5, 0.01)
+	bloom := bloomFilter.NewBloomFilter(5, 0.01)
 	// fmt.Println(bloom.M, bloom.K)
 	// fmt.Println(bloom.Fns)
 	bloom.Add([]byte("wasd"))
@@ -106,21 +106,14 @@ func main() {
 
 	//lru test
 
-	lru_cache := &Lru.LRUCache{velicina: 5, korisceni: list.New(), hash_mapa: make(map[string]*list.Element)}
-	lru_cache.dodaj("1", []byte("vr1"))
-	lru_cache.dodaj("2", []byte("vr2"))
-	lru_cache.dodaj("3", []byte("vr3"))
-	lru_cache.dodaj("4", []byte("vr4"))
-	lru_cache.dodaj("5", []byte("vr5"))
-	lru_cache.dodaj("6", []byte("vr6"))
-	lru_cache.dodaj("7", []byte("vr7"))
-	lru_cache.citaj("3")
-	lru_cache.dodaj("8", []byte("vr8"))
-	lru_cache.dodaj("5", []byte("vr15"))
+	lru_cache := &Lru.LRUCache{Velicina: 5, Korisceni: list.New(), Hash_mapa: make(map[string]*list.Element)}
+	x = Util.NewPodatak("d", []byte("2estodrugo"), 1)
+	lru_cache.Dodaj(x)
+	lru_cache.Citaj("d")
 
-	if lru_cache.citaj("3") == nil {
-		fmt.Println("Ne postoji")
-	} else {
-		fmt.Println(string(lru_cache.citaj("3")))
-	}
+	// if lru_cache.citaj("3") == nil {
+	// 	fmt.Println("Ne postoji")
+	// } else {
+	// 	fmt.Println(string(lru_cache.citaj("3")))
+	// }
 }
