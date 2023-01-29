@@ -1,45 +1,45 @@
-package main
+package lru
 
 import (
 	"container/list"
-	"fmt"
+	importi "projekat/utils"
 )
 
 type LRUCache struct {
-	velicina  int
-	korisceni *list.List
-	hash_mapa map[string]*list.Element
+	Velicina  int
+	Korisceni *list.List
+	Hash_mapa map[string]*list.Element
 }
 
-type Element struct {
-	kljuc    string
-	vrednost []byte
-}
+func (lru *LRUCache) Dodaj(podatak importi.Podatak) {
 
-func (lru *LRUCache) dodaj(kljuc string, vrednost []byte) {
+	el, ima := lru.Hash_mapa[podatak.Key]
 
-	if el, ima := lru.hash_mapa[kljuc]; ima {
-		lru.korisceni.MoveToFront(el)
-		el.Value.(*Element).vrednost = vrednost
+	if ima {
+
+		lru.Korisceni.MoveToFront(el)
+		el.Value = podatak
 	} else {
 
-		kljuc_vr := &Element{kljuc: kljuc, vrednost: vrednost}
-		lru.hash_mapa[kljuc] = lru.korisceni.PushFront(kljuc_vr)
+		lru.Hash_mapa[podatak.Key] = lru.Korisceni.PushFront(podatak)
 
-		if lru.velicina < lru.korisceni.Len() {
-			delete(lru.hash_mapa, lru.korisceni.Back().Value.(*Element).kljuc)
-			lru.korisceni.Remove(lru.korisceni.Back())
+		if lru.Velicina < lru.Korisceni.Len() {
+			delete(lru.Hash_mapa, lru.Korisceni.Back().Value.(importi.Podatak).Key)
+			lru.Korisceni.Remove(lru.Korisceni.Back())
 		}
+
 	}
 
 }
 
-func (lru *LRUCache) citaj(kljuc string) []byte {
+func (lru *LRUCache) Citaj(kljuc string) []byte {
 
-	if el, ima := lru.hash_mapa[kljuc]; ima {
+	el, ima := lru.Hash_mapa[kljuc]
 
-		lru.korisceni.MoveToFront(el)
-		return el.Value.(*Element).vrednost
+	if ima {
+
+		lru.Korisceni.MoveToFront(el)
+		return el.Value.(importi.Podatak).Value
 
 	} else {
 		return nil
@@ -47,24 +47,8 @@ func (lru *LRUCache) citaj(kljuc string) []byte {
 
 }
 
-func main() {
+func NoviLRU(vel int) LRUCache {
 
-	lru_cache := &LRUCache{velicina: 5, korisceni: list.New(), hash_mapa: make(map[string]*list.Element)}
-	lru_cache.dodaj("1", []byte("vr1"))
-	lru_cache.dodaj("2", []byte("vr2"))
-	lru_cache.dodaj("3", []byte("vr3"))
-	lru_cache.dodaj("4", []byte("vr4"))
-	lru_cache.dodaj("5", []byte("vr5"))
-	lru_cache.dodaj("6", []byte("vr6"))
-	lru_cache.dodaj("7", []byte("vr7"))
-	lru_cache.citaj("3")
-	lru_cache.dodaj("8", []byte("vr8"))
-	lru_cache.dodaj("5", []byte("vr15"))
-
-	if lru_cache.citaj("3") == nil {
-		fmt.Println("Ne postoji")
-	} else {
-		fmt.Println(string(lru_cache.citaj("3")))
-	}
-
+	lru_cache := &LRUCache{Velicina: vel, Korisceni: list.New(), Hash_mapa: make(map[string]*list.Element)}
+	return *lru_cache
 }
