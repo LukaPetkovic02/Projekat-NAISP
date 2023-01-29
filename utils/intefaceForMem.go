@@ -2,6 +2,6 @@ package pomocnefje
 
 type memTableInterface interface {
 	Put(data Podatak) []Podatak
-	SearchData() Podatak
+	SearchData(Key string) Podatak
 	GetAllData() []Podatak
 }
