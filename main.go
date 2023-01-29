@@ -1,13 +1,12 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
 	"projekat/bloomFilter"
 	Btree "projekat/btree"
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
-	Lru "projekat/lrukesh"
+	Lru "projekat/lru"
 	Util "projekat/utils"
 )
 
@@ -106,14 +105,19 @@ func main() {
 
 	//lru test
 
-	lru_cache := &Lru.LRUCache{Velicina: 5, Korisceni: list.New(), Hash_mapa: make(map[string]*list.Element)}
-	x = Util.NewPodatak("d", []byte("2estodrugo"), 1)
-	lru_cache.Dodaj(x)
-	lru_cache.Citaj("d")
+	lru_cache := Lru.NoviLRU()
 
-	// if lru_cache.citaj("3") == nil {
-	// 	fmt.Println("Ne postoji")
-	// } else {
-	// 	fmt.Println(string(lru_cache.citaj("3")))
-	// }
+	lru_cache.Dodaj(Util.NewPodatak("a", []byte("1estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("b", []byte("2estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("c", []byte("3estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("d", []byte("4estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("e", []byte("4estodrugo"), 1)) //zakomentarisi par elemenata da b ostane u lru-u da bi radilo
+	lru_cache.Dodaj(Util.NewPodatak("f", []byte("4estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("a", []byte("7estodrugo"), 1))
+
+	if lru_cache.Citaj("b") == nil {
+		fmt.Println("Ne postoji")
+	} else {
+		fmt.Println(string(lru_cache.Citaj("b")))
+	}
 }
