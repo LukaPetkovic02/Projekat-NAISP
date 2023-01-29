@@ -3,6 +3,7 @@ package pomocnefje
 import (
 	"encoding/binary"
 	"fmt"
+	"time"
 )
 
 type Podatak struct {
@@ -66,6 +67,21 @@ func EncodeToData(data []byte) Podatak {
 
 	tombstone := data[TOMBSTONE_START : TOMBSTONE_START+TOMBSTONE_SIZE]
 	ret.Tombstone = byte(tombstone[0])
+
+	return ret
+}
+
+func NewPodatak(Key string, Value []byte, Tombstone byte) Podatak {
+	var ret Podatak
+
+	ret.Key = Key
+
+	ret.Value = Value
+
+	now := time.Now().Unix()
+	ret.Timestamp = int64(now)
+
+	ret.Tombstone = Tombstone
 
 	return ret
 }
