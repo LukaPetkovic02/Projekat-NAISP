@@ -6,6 +6,7 @@ import (
 	Btree "projekat/btree"
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
+	Lru "projekat/lru"
 	Util "projekat/utils"
 )
 
@@ -101,4 +102,21 @@ func main() {
 	// hajper.Add([]byte("dasdas"))
 	// fmt.Println(hajper.Estimate())
 	// fmt.Println(hajper.Reg)
+
+	lru_cache := Lru.NoviLRU()
+
+	lru_cache.Dodaj(Util.NewPodatak("a", []byte("1estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("b", []byte("2estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("c", []byte("3estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("d", []byte("4estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("e", []byte("4estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("f", []byte("4estodrugo"), 1))
+	lru_cache.Dodaj(Util.NewPodatak("a", []byte("7estodrugo"), 1))
+
+	if lru_cache.Citaj("b") == nil {
+		fmt.Println("Ne postoji")
+	} else {
+		fmt.Println(string(lru_cache.Citaj("b")))
+	}
+
 }
