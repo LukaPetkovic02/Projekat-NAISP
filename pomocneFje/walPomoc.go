@@ -1,4 +1,4 @@
-package wal
+package pomocnefje
 
 import (
 	"hash/crc32"
