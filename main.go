@@ -1,11 +1,13 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
 	Bloom "projekat/bloomFilter"
 	Btree "projekat/btree"
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
+	Lru "projekat/lru"
 	Util "projekat/utils"
 )
 
@@ -101,4 +103,24 @@ func main() {
 	// hajper.Add([]byte("dasdas"))
 	// fmt.Println(hajper.Estimate())
 	// fmt.Println(hajper.Reg)
+
+	//lru test
+
+	lru_cache := &Lru.LRUCache{velicina: 5, korisceni: list.New(), hash_mapa: make(map[string]*list.Element)}
+	lru_cache.dodaj("1", []byte("vr1"))
+	lru_cache.dodaj("2", []byte("vr2"))
+	lru_cache.dodaj("3", []byte("vr3"))
+	lru_cache.dodaj("4", []byte("vr4"))
+	lru_cache.dodaj("5", []byte("vr5"))
+	lru_cache.dodaj("6", []byte("vr6"))
+	lru_cache.dodaj("7", []byte("vr7"))
+	lru_cache.citaj("3")
+	lru_cache.dodaj("8", []byte("vr8"))
+	lru_cache.dodaj("5", []byte("vr15"))
+
+	if lru_cache.citaj("3") == nil {
+		fmt.Println("Ne postoji")
+	} else {
+		fmt.Println(string(lru_cache.citaj("3")))
+	}
 }
