@@ -7,25 +7,25 @@ import (
 )
 
 type MerkleRoot struct {
-	root *Node
+	Root *Node
 }
 
 func (mr *MerkleRoot) String() string {
-	return mr.root.String()
+	return mr.Root.String()
 }
 
 type Node struct {
-	data  []byte
-	left  *Node
-	right *Node
+	Data  []byte
+	Left  *Node
+	Right *Node
 }
 
 func (n *Node) String() string {
-	return hex.EncodeToString(n.data[:])
+	return hex.EncodeToString(n.Data[:])
 }
 
-func Hash(data []byte) [20]byte {
-	return sha1.Sum(data)
+func Hash(Data []byte) [20]byte {
+	return sha1.Sum(Data)
 }
 
 func Listovi(list []string) []*Node {
@@ -35,9 +35,9 @@ func Listovi(list []string) []*Node {
 	for _, kljucevi := range list {
 		var hes = Hash([]byte(kljucevi))
 		cvorovi = append(cvorovi, &Node{
-			data:  hes[:],
-			left:  nil,
-			right: nil,
+			Data:  hes[:],
+			Left:  nil,
+			Right: nil,
 		})
 	}
 
@@ -50,17 +50,17 @@ func Formiraj_stablo(listovi []*Node) *Node {
 		return listovi[0]
 	}
 	if len(listovi)%2 == 1 {
-		listovi = append(listovi, &Node{data: []byte{}, left: nil, right: nil})
+		listovi = append(listovi, &Node{Data: []byte{}, Left: nil, Right: nil})
 	}
 
 	var roditelji []*Node
 
 	for i := 0; i < len(listovi); i += 2 {
 
-		var hes = append(listovi[i].data, listovi[i+1].data...)
+		var hes = append(listovi[i].Data, listovi[i+1].Data...)
 		var hes2 = Hash(hes)
 
-		roditelji = append(roditelji, &Node{data: hes2[:], left: listovi[i], right: listovi[i+1]})
+		roditelji = append(roditelji, &Node{Data: hes2[:], Left: listovi[i], Right: listovi[i+1]})
 	}
 
 	return Formiraj_stablo(roditelji)
@@ -80,13 +80,13 @@ func Obilazak_stabla(pocetak *Node) [][]byte {
 
 		fmt.Println(cvor.String())
 
-		if cvor.left != nil {
-			cvorovi = append(cvorovi, cvor.left)
-			svi_hesevi = append(svi_hesevi, cvor.left.data)
+		if cvor.Left != nil {
+			cvorovi = append(cvorovi, cvor.Left)
+			svi_hesevi = append(svi_hesevi, cvor.Left.Data)
 		}
-		if cvor.right != nil {
-			cvorovi = append(cvorovi, cvor.right)
-			svi_hesevi = append(svi_hesevi, cvor.right.data)
+		if cvor.Right != nil {
+			cvorovi = append(cvorovi, cvor.Right)
+			svi_hesevi = append(svi_hesevi, cvor.Right.Data)
 		}
 	}
 

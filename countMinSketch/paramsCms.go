@@ -1,13 +1,11 @@
 package cms
 
-import (
-	"math"
-)
+import "math"
 
-func CalculateM(epsilon float64) uint {
+func CalculateMC(epsilon float64) uint {
 	return uint(math.Ceil(math.E / epsilon))
 }
 
-func CalculateK(delta float64) uint {
+func CalculateKC(delta float64) uint {
 	return uint(math.Ceil(math.Log(math.E / delta)))
 }
