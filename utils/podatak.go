@@ -85,3 +85,11 @@ func NewPodatak(Key string, Value []byte, Tombstone byte) Podatak {
 
 	return ret
 }
+
+func (p *Podatak) InitPrazanPodatak() Podatak {
+	p.Key = ""
+	p.Value = []byte("")
+	p.Tombstone = 0
+	p.Timestamp = time.Now().Unix()
+	return *p
+}
