@@ -30,7 +30,7 @@ func main() {
 	s.Put(Util.NewPodatak("a", []byte("nesto"), 1))
 	s.Put(Util.NewPodatak("b", []byte("nesto2"), 1))
 
-	sortirani := s.AllDataSortedBegin()
+	sortirani := s.GetAllData()
 	for i := 0; i < len(sortirani); i++ {
 		sortirani[i].PrintData()
 	}

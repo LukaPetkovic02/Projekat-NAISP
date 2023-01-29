@@ -43,28 +43,6 @@ func (st *Stablo) InitSP(Max int, Max_capacity int) Stablo {
 	return *st
 }
 
-func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, ako ima vraca node i njegovu poziciju u nizu podataka u tom cvoru
-	x := s.Head
-	t := true
-	var i int
-	for x != nil {
-		t = true
-		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
-				return x, i
-			} else if x.Value[i].Key > SearchKey {
-				x = x.Children[i]
-				t = false
-				break
-			}
-		}
-		if t {
-			x = x.Children[i]
-		}
-	}
-	return x, 0
-}
-
 func BrEl(Value []importi.Podatak) int {
 	var i int
 
@@ -283,7 +261,7 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 	//proveri dal je popunjen kapacitet
 	s.Cur_capacity += 1
 	if s.Cur_capacity == s.Max_capacity {
-		A1 := s.AllDataSortedBegin()
+		A1 := s.GetAllData()
 		s.InitSP(s.Max, s.Max_capacity)
 		return A1
 	} else {
@@ -320,7 +298,7 @@ func Ispis(x *Node, nivo int) {
 	}
 }
 
-func (s *Stablo) AllDataSortedBegin() []importi.Podatak { //vraca listu sortiranih podataka
+func (s *Stablo) GetAllData() []importi.Podatak { //vraca listu sortiranih podataka
 	Value := make([]importi.Podatak, 0)
 	s.AllDataSorted(s.Head, &Value)
 	return Value
@@ -339,4 +317,26 @@ func (s *Stablo) AllDataSorted(n *Node, Value *[]importi.Podatak) {
 	if n.Children[0] != nil {
 		s.AllDataSorted(n.Children[BrEl(n.Value)], Value)
 	}
+}
+
+func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, ako ima vraca node i njegovu poziciju u nizu podataka u tom cvoru
+	x := s.Head
+	t := true
+	var i int
+	for x != nil {
+		t = true
+		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
+			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+				return x, i
+			} else if x.Value[i].Key > SearchKey {
+				x = x.Children[i]
+				t = false
+				break
+			}
+		}
+		if t {
+			x = x.Children[i]
+		}
+	}
+	return x, 0
 }
