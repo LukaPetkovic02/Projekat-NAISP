@@ -1,4 +1,4 @@
-package hll
+package hall
 
 import (
 	"math"
