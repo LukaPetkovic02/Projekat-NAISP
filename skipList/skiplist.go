@@ -84,6 +84,20 @@ func (s *SkipList) SearchData(searchKey string) *Importi.Podatak { //vraca vredn
 	return nil
 }
 
+func (s *SkipList) AllDataSortedBegin() []Importi.Podatak {
+	//ovde treba sortirati sve cvorove po kljucu i vratiti sortiranu listu cvorova
+	//cvorovi u skip listi su po difoltu sortirani tako da samo prolazim kroz najnizi nivo
+	sortNodeovi := []Importi.Podatak{}
+	x := s.head
+	for x != nil {
+		sortNodeovi = append(sortNodeovi, x.podatak)
+		x = x.next[0]
+	}
+	//treba isprazniti listu kada se ona popuni
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+	return sortNodeovi
+}
+
 func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
 	if s.Search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
 		x := s.head
@@ -124,17 +138,7 @@ func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
 
 	if s.size >= s.max_capacity {
 		fmt.Println("Skip lista je popunjena!")
-		//ovde treba sortirati sve cvorove po kljucu i vratiti sortiranu listu cvorova
-		//cvorovi u skip listi su po difoltu sortirani tako da samo prolazim kroz najnizi nivo
-		sortNodeovi := []Importi.Podatak{}
-		x := s.head
-		for x != nil {
-			sortNodeovi = append(sortNodeovi, x.podatak)
-			x = x.next[0]
-		}
-		//treba isprazniti listu kada se ona popuni
-		s.InitSP(s.maxHeight, s.height, s.max_capacity)
-		return sortNodeovi
+		return s.AllDataSortedBegin()
 	}
 
 	return nil
