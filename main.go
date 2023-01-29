@@ -8,7 +8,6 @@ import (
 	Hajp "projekat/hajperll"
 	Lru "projekat/lru"
 	Util "projekat/utils"
-	"time"
 )
 
 func main() {
@@ -26,50 +25,15 @@ func main() {
 	//B stablo testovi
 
 	var s Btree.Stablo
-	s.InitSP(3)
+	s.InitSP(3, 20)
 	fmt.Println(s)
-	s.Put("a", []byte("nesto"), time.Now())
-	s.Put("b", []byte("nesto"), time.Now())
-	//cvor, i := s.Search("4")
-	//fmt.Println(cvor, i)
-	s.Put("c", []byte("1estodrugo"), time.Now())
-	s.Put("d", []byte("2estodrugo"), time.Now())
-	s.Put("e", []byte("3estodrugo"), time.Now())
-	s.Put("f", []byte("4estodrugo"), time.Now())
-	s.Put("g", []byte("5estodrugo"), time.Now())
-	s.Put("h", []byte("6estodrugo"), time.Now())
-	s.Put("i", []byte("7estodrugo"), time.Now())
-	s.Put("j", []byte("1estodrugo"), time.Now())
-	s.Put("k", []byte("2estodrugo"), time.Now())
-	s.Put("l", []byte("3estodrugo"), time.Now())
-	s.Put("m", []byte("2estodrugo"), time.Now())
-	s.Put("n", []byte("3estodrugo"), time.Now())
-	s.Put("o", []byte("4estodrugo"), time.Now())
-	s.Put("p", []byte("5estodrugo"), time.Now())
-	s.Put("q", []byte("6estodrugo"), time.Now())
-	s.Put("r", []byte("7estodrugo"), time.Now())
-	s.Put("s", []byte("1estodrugo"), time.Now())
-	s.Put("t", []byte("2estodrugo"), time.Now())
-	s.Put("u", []byte("3estodrugo"), time.Now())
-	s.Put("v", []byte("4estodrugo"), time.Now())
-	s.Put("w", []byte("5estodrugo"), time.Now())
-	s.Put("x", []byte("6estodrugo"), time.Now())
-	s.Put("y", []byte("7estodrugo"), time.Now())
-	s.Put("z", []byte("7estodrugo"), time.Now())
+	s.Put(Util.NewPodatak("a", []byte("nesto"), 1))
+	s.Put(Util.NewPodatak("b", []byte("nesto2"), 1))
 
-	fmt.Println("PRE")
-	s.Put("a", []byte("promenjeno"), time.Now())
-	s.Delete("a", time.Now())
 	sortirani := s.AllDataSortedBegin()
 	for i := 0; i < len(sortirani); i++ {
 		sortirani[i].PrintData()
 	}
-
-	Btree.Ispis(s.Head, 0)
-	v1, _ := s.Search("a")
-	v2, _ := s.Search("b")
-	fmt.Println(v1)
-	fmt.Println(v2)
 
 	//CMS testovi
 

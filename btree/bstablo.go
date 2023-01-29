@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-//kasnije treba import za podatak
-
 type Stablo struct {
-	Max  int
-	Head *Node
+	Max          int
+	Head         *Node
+	Max_capacity int
+	Cur_capacity int
 }
 
 type Node struct {
@@ -30,7 +30,7 @@ func (s *Node) InitSP(Max int, Parent *Node) Node {
 	return *s
 }
 
-func (st *Stablo) InitSP(Max int) Stablo {
+func (st *Stablo) InitSP(Max int, Max_capacity int) Stablo {
 	nilRoditelj := new(Node)
 	st.Head = new(Node)
 	st.Head.InitSP(Max, nilRoditelj)
@@ -38,10 +38,12 @@ func (st *Stablo) InitSP(Max int) Stablo {
 	//st.Head.Children = make([]*Node, Max+2)
 	//st.Head.InitSP(Key, Value, Max, nilRoditelj)
 	st.Max = Max
+	st.Max_capacity = Max_capacity
+	st.Cur_capacity = 0
 	return *st
 }
 
-func (s *Stablo) Search(SearchKey string) (*Node, int) {
+func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, ako ima vraca node i njegovu poziciju u nizu podataka u tom cvoru
 	x := s.Head
 	t := true
 	var i int
@@ -124,29 +126,32 @@ func PodeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
 	return x1, x2, x3
 }
 
-func (s *Stablo) Put(addKey string, addValue []byte, vreme time.Time) {
+func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 	if s.Head.Value[0].Key == "" { //ako je prazno stablo
-		s.Head.Value[0].Key = addKey
-		s.Head.Value[0].Value = addValue
-		s.Head.Value[0].Tombstone = 0
-		s.Head.Value[0].Timestamp = vreme.Unix()
-		return
+		//s.Head.Value[0].Key = addKey
+		//s.Head.Value[0].Value = addValue
+		//s.Head.Value[0].Tombstone = 0
+		//s.Head.Value[0].Timestamp = vreme.Unix()
+		s.Head.Value[0] = podatak
+		return nil
 	}
 
-	a, _ := s.Search(addKey)
+	a, _ := s.Search(podatak.Key)
 
-	if a != nil { //ako element vec postoji, samo cemo mu promeniti Value i timestamp!!!!
+	if a != nil { //ako element vec postoji
 		x := s.Head
 		t := true
 		var i int
 		for x != nil {
 			t = true
 			for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-				if addKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
-					x.Value[i].Value = addValue
-					x.Value[i].Timestamp = vreme.Unix()
-					return
-				} else if x.Value[i].Key > addKey {
+				if podatak.Key == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+					x.Value[i].Value = podatak.Value
+					x.Value[i].Timestamp = podatak.Timestamp
+					x.Value[i].Tombstone = podatak.Tombstone
+					x.Value[i].Timestamp = podatak.Timestamp
+					return nil
+				} else if x.Value[i].Key > podatak.Key {
 					x = x.Children[i]
 					t = false
 					break
@@ -158,12 +163,13 @@ func (s *Stablo) Put(addKey string, addValue []byte, vreme time.Time) {
 		}
 	}
 
+	//ako ne postoji onda je dodavanje
 	x := s.Head
 	t := true
 	var i int
 	for x.Children[0] != nil { //ne moze x.Children!=nil;;ako mu je prvo dete nil znaci da nema dece
 		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-			if x.Value[i].Key > addKey {
+			if x.Value[i].Key > podatak.Key {
 				x = x.Children[i]
 				t = false
 				break
@@ -175,11 +181,11 @@ func (s *Stablo) Put(addKey string, addValue []byte, vreme time.Time) {
 		}
 		t = true
 	}
-	temps := addKey
-	tempb := addValue
+	temps := podatak.Key
+	tempb := podatak.Value
 	var tempt byte
-	tempt = 0
-	tempv := vreme.Unix()
+	tempt = podatak.Tombstone
+	tempv := podatak.Timestamp
 	// kad nadjemo
 	for i = 0; i < BrEl(x.Value); i++ {
 		if temps < x.Value[i].Key {
@@ -274,35 +280,14 @@ func (s *Stablo) Put(addKey string, addValue []byte, vreme time.Time) {
 
 	}
 	SrediRoditelje(s.Head)
-}
-
-func (s *Stablo) Delete(DeleteKey string, vreme time.Time) { //logicko brisanje
-	a, _ := s.Search(DeleteKey)
-
-	if a != nil { //ako element postoji, samo cemo mu promeniti timestamp!
-		x := s.Head
-		t := true
-		var i int
-		for x != nil {
-			t = true
-			for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-				if DeleteKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
-					x.Value[i].Tombstone = 1
-					x.Value[i].Timestamp = vreme.Unix()
-					return
-				} else if x.Value[i].Key > DeleteKey {
-					x = x.Children[i]
-					t = false
-					break
-				}
-			}
-			if t {
-				x = x.Children[i]
-			}
-		}
+	//proveri dal je popunjen kapacitet
+	s.Cur_capacity += 1
+	if s.Cur_capacity == s.Max_capacity {
+		A1 := s.AllDataSortedBegin()
+		s.InitSP(s.Max, s.Max_capacity)
+		return A1
 	} else {
-		fmt.Println("Element sa tim kljucem ne postoji!")
-		return
+		return nil
 	}
 }
 
@@ -355,50 +340,3 @@ func (s *Stablo) AllDataSorted(n *Node, Value *[]importi.Podatak) {
 		s.AllDataSorted(n.Children[BrEl(n.Value)], Value)
 	}
 }
-
-// func main() {
-// 	var s Stablo
-// 	s.InitSP(3)
-// 	fmt.Println(s)
-// 	s.Put("a", []byte("nesto"), time.Now())
-// 	s.Put("b", []byte("nesto"), time.Now())
-// 	//cvor, i := s.Search("4")
-// 	//fmt.Println(cvor, i)
-// 	s.Put("c", []byte("1estodrugo"), time.Now())
-// 	s.Put("d", []byte("2estodrugo"), time.Now())
-// 	s.Put("e", []byte("3estodrugo"), time.Now())
-// 	s.Put("f", []byte("4estodrugo"), time.Now())
-// 	s.Put("g", []byte("5estodrugo"), time.Now())
-// 	s.Put("h", []byte("6estodrugo"), time.Now())
-// 	s.Put("i", []byte("7estodrugo"), time.Now())
-// 	s.Put("j", []byte("1estodrugo"), time.Now())
-// 	s.Put("k", []byte("2estodrugo"), time.Now())
-// 	s.Put("l", []byte("3estodrugo"), time.Now())
-// 	s.Put("m", []byte("2estodrugo"), time.Now())
-// 	s.Put("n", []byte("3estodrugo"), time.Now())
-// 	s.Put("o", []byte("4estodrugo"), time.Now())
-// 	s.Put("p", []byte("5estodrugo"), time.Now())
-// 	s.Put("q", []byte("6estodrugo"), time.Now())
-// 	s.Put("r", []byte("7estodrugo"), time.Now())
-// 	s.Put("s", []byte("1estodrugo"), time.Now())
-// 	s.Put("t", []byte("2estodrugo"), time.Now())
-// 	s.Put("u", []byte("3estodrugo"), time.Now())
-// 	s.Put("v", []byte("4estodrugo"), time.Now())
-// 	s.Put("w", []byte("5estodrugo"), time.Now())
-// 	s.Put("x", []byte("6estodrugo"), time.Now())
-// 	s.Put("y", []byte("7estodrugo"), time.Now())
-// 	s.Put("z", []byte("7estodrugo"), time.Now())
-
-// 	fmt.Println("PRE")
-// 	s.Put("a", []byte("promenjeno"), time.Now())
-// 	s.Delete("a", time.Now())
-// 	sortirani := s.AllDataSorted()
-// 	for i := 0; i < len(sortirani); i++ {
-// 		sortirani[i].PrintData()
-// 	}
-// 	//Ispis(s.Head, 0)
-// 	//v1, _ := s.Search("a")
-// 	//v2, _ := s.Search("b")
-// 	//fmt.Println(v1)
-// 	//fmt.Println(v2)
-// }
