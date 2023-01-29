@@ -7,6 +7,7 @@ import (
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
 	Lru "projekat/lru"
+	SkipList "projekat/skipList"
 	Util "projekat/utils"
 	//"time"
 )
@@ -22,7 +23,12 @@ func main() {
 	// fmt.Println(bloom.Podaci)
 	// fmt.Println(bloom.Search([]byte("wasd")))
 	// fmt.Println(bloom.Search([]byte("nesto drugo")))
-
+	var p Util.Podatak
+	p = Util.NewPodatak("1", []byte("bajtovi"), 0)
+	//skip lista testovi
+	var sk SkipList.SkipList
+	sk.InitSP(10, 5, 5)
+	sk.Put(p)
 	//B stablo testovi
 
 	var s Btree.Stablo

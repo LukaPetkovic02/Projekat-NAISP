@@ -291,36 +291,6 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 	}
 }
 
-/*func (s *Stablo) Delete(podatak importi.Podatak) { //logicko brisanje
-	a, _ := s.Search(DeleteKey)
-
-	if a != nil { //ako element postoji, samo cemo mu promeniti timestamp!
-		x := s.Head
-		t := true
-		var i int
-		for x != nil {
-			t = true
-			for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-				if DeleteKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
-					x.Value[i].Tombstone = 1
-					x.Value[i].Timestamp = vreme.Unix()
-					return
-				} else if x.Value[i].Key > DeleteKey {
-					x = x.Children[i]
-					t = false
-					break
-				}
-			}
-			if t {
-				x = x.Children[i]
-			}
-		}
-	} else {
-		fmt.Println("Element sa tim kljucem ne postoji!")
-		return
-	}
-}*/
-
 func SrediRoditelje(x *Node) {
 	if x != nil {
 		for i := 0; i < len(x.Children); i++ {
