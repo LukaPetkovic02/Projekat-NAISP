@@ -70,6 +70,20 @@ func (s *SkipList) Search(searchKey string) *SkipListNode { //vraca vrednost koj
 	return nil
 }
 
+func (s *SkipList) SearchData(searchKey string) *Importi.Podatak { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
+	x := s.head
+	var i int
+	for i = s.height; i >= 0; i-- {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone != 1 {
+			return &x.podatak
+		}
+		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
+			x = x.next[i]
+		}
+	}
+	return nil
+}
+
 func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
 	if s.Search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
 		x := s.head

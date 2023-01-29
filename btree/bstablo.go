@@ -65,6 +65,28 @@ func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, a
 	return x, 0
 }
 
+func (s *Stablo) SearchData(SearchKey string) *importi.Podatak { //ako nema vraca nil, ako ima vraca podatak
+	x := s.Head
+	t := true
+	var i int
+	for x != nil {
+		t = true
+		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
+			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+				return &x.Value[i]
+			} else if x.Value[i].Key > SearchKey {
+				x = x.Children[i]
+				t = false
+				break
+			}
+		}
+		if t {
+			x = x.Children[i]
+		}
+	}
+	return nil
+}
+
 func BrEl(Value []importi.Podatak) int {
 	var i int
 
@@ -323,6 +345,7 @@ func Ispis(x *Node, nivo int) {
 func (s *Stablo) AllDataSortedBegin() []importi.Podatak { //vraca listu sortiranih podataka
 	Value := make([]importi.Podatak, 0)
 	s.AllDataSorted(s.Head, &Value)
+	s.InitSP(s.Max, s.Max_capacity) //isprazni stablo
 	return Value
 }
 
