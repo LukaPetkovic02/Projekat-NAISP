@@ -14,7 +14,6 @@ type Stablo struct {
 }
 
 type Node struct {
-	Key      []string
 	Value    []importi.Podatak
 	Children []*Node
 	Parent   *Node
