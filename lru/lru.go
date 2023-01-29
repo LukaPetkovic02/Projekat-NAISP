@@ -47,8 +47,8 @@ func (lru *LRUCache) Citaj(kljuc string) []byte {
 
 }
 
-func NoviLRU() LRUCache {
+func NoviLRU(vel int) LRUCache {
 
-	lru_cache := &LRUCache{Velicina: 5, Korisceni: list.New(), Hash_mapa: make(map[string]*list.Element)}
+	lru_cache := &LRUCache{Velicina: vel, Korisceni: list.New(), Hash_mapa: make(map[string]*list.Element)}
 	return *lru_cache
 }

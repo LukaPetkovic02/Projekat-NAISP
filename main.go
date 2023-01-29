@@ -101,7 +101,7 @@ func main() {
 
 	//lru test
 
-	lru_cache := Lru.NoviLRU()
+	lru_cache := Lru.NoviLRU(5)
 
 	lru_cache.Dodaj(Util.NewPodatak("a", []byte("1estodrugo"), 1))
 	lru_cache.Dodaj(Util.NewPodatak("b", []byte("2estodrugo"), 1))
