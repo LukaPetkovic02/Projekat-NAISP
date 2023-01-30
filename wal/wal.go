@@ -8,6 +8,7 @@ import (
 )
 
 func Append(record types.Record) bool {
+	// TODO: Open the file as memory mapped
 	file, err := os.OpenFile(engine.GetCurrentWalFilePath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
 	if err != nil {
 		panic(err)

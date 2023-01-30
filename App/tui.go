@@ -6,6 +6,7 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 )
 
+// TODO: Add Range Scan and Get List options
 func TUI(memtable *memtable.Memtable) {
 	var isRunning = true
 	for isRunning {
@@ -52,6 +53,7 @@ func getUserInput() string {
 	return input
 }
 
+// TOOD: Add Range Scan and Get List options
 func printMenu() {
 	println("1. Add record")
 	println("2. Get record")

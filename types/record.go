@@ -50,7 +50,7 @@ func (record Record) Serialize() []byte {
 	return serializedRecord.Bytes()
 }
 
-// func (record Record) Deserialize() []byte {
-// 	// TODO
-// 	return nil
-// }
+func DeserializeRecord(serializedRecord []byte) Record {
+	// TODO: Implement this function
+	return Record{}
+}

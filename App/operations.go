@@ -7,12 +7,14 @@ import (
 )
 
 func HandleAdd(key string, value []byte, memtable *memtable.Memtable) {
+	// TODO: check if request can be made with token bucket
 	var newRecord = types.CreateRecord(key, value, false)
 	if wal.Append(newRecord) {
 		memtable.Add(key, newRecord)
 	}
 }
 func HandleGet(key string, memtable *memtable.Memtable) *types.Record {
+	// TODO: check if request can be made with token bucket
 	var record = memtable.Get(key)
 	if record != nil {
 		return record
@@ -21,7 +23,8 @@ func HandleGet(key string, memtable *memtable.Memtable) *types.Record {
 	// TODO: check disk
 	return nil
 }
-func HandleDelete(key string, memtable *memtable.Memtable) {
+func HandleDelete(key string, memtable *memtable.Memtable) bool {
+	// TODO: check if request can be made with token bucket
 	//TODO: check if key exist in memtable and set tombstone to true
 	// var record = HandleGet(key, memtable)
 	// if record != nil {
@@ -32,4 +35,12 @@ func HandleDelete(key string, memtable *memtable.Memtable) {
 	// }else{
 	// fmt.Println("Record doesn't exist")
 	// }
+	return false
+}
+
+func HandleGetList() {
+	// TODO: Implement this
+}
+func HandleRangeScan() {
+	// TODO: Implement this
 }
