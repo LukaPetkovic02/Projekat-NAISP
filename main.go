@@ -39,10 +39,13 @@ func main() {
 	var mem Memtable.MemTable
 	mem = &s
 	mem.Put(p)
+	fmt.Println("memtable kao stablo") //samo gledam dal radi
+	fmt.Println(mem)
 
 	mem = &sk
 	mem.Put(p)
-
+	fmt.Println("memtable kao skip lista")
+	fmt.Println(mem)
 	//fmt.Println(s)
 	//s.Put("a", []byte("nesto"), time.Now())
 	//s.Put("b", []byte("nesto"), time.Now())
