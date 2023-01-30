@@ -10,6 +10,6 @@ import (
 func main() {
 	engine.CreateDataFolderStructure()
 	var memtable = memtable.Init(100, skipList.NewSkipList(7))
-	// TODO: initialize LRU here and pass it to App
+	// TODO: initialize LRU here and pass it to Appsasada
 	App.TUI(memtable)
 }

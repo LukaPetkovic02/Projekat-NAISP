@@ -20,4 +20,4 @@ func WriteSSTable(listOfRecords []types.Record) {
 }
 
 // TODO: Make function for reading from sstable
-// TODO: Load only part of summary file into memory
+// TODO: Load only part of summary file into memory izmjena

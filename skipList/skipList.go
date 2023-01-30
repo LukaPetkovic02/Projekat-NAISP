@@ -61,11 +61,11 @@ func (s *SkipList) roll() int {
 
 func (s *SkipList) Get(key string) *types.Record {
 
-	return s.Search(key)
+	return s.search(key)
 
 }
 
-func (s *SkipList) Search(key string) *types.Record {
+func (s *SkipList) search(key string) *types.Record {
 
 	node := s.head
 	if node == nil {
@@ -88,7 +88,7 @@ func (s *SkipList) Search(key string) *types.Record {
 
 func (s *SkipList) Add(key string, record types.Record) bool {
 
-	if key == "" || s.Search(key) != nil {
+	if key == "" || s.search(key) != nil {
 		return false
 	}
 	level := s.roll()
