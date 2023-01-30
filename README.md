@@ -81,17 +81,32 @@ There are some Todo left in code that shows where things are meant to be impleme
 - use descriptive variable names
 - Only expose(first letter capital) functions from packages that are used in other packages
   
-### Collaboration
+## Collaboration
 
-## Clone repository
+### Clone repository
 
 ```git clone <put url here>```
 
-## Switch to branch
+### Switch to dev branch
 
-```git switch <branch-name>```
+```git switch dev```
 
-## Making Changes
+### Create branch
+
+Create Branch of feature you are working on
+
+```git checkout -b <name>```
+
+### Push branch with
+
+```git push --set-upstream origin <name>```
+
+### (Optional) Open Pull request to merge to dev
+
+You can open pull request(merge request) on github page.
+You don't to do it it you are not sure how.
+
+### Making Changes
 
 Make changes to your code, then commit them with
 
