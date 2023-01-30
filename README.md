@@ -82,3 +82,25 @@ There are some Todo left in code that shows where things are meant to be impleme
 - Only expose(first letter capital) functions from packages that are used in other packages
   
 ### Collaboration
+
+## Clone repository
+
+```git clone <put url here>```
+
+## Switch to branch
+
+```git switch <branch-name>```
+
+## Making Changes
+
+Make changes to your code, then commit them with
+
+```git add .```
+
+```git commit -m "<commit message here>"```
+
+Push changes to pull request that is already open with
+
+```git push```
+
+That is it :)
