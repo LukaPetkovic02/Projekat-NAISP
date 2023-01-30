@@ -7,6 +7,7 @@ import (
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
 	Lru "projekat/lru"
+	Memtable "projekat/meemtable"
 	SkipList "projekat/skipList"
 	Util "projekat/utils"
 	//"time"
@@ -33,6 +34,15 @@ func main() {
 
 	var s Btree.Stablo
 	s.InitSP(3, 10)
+
+	//testiranje memtablea
+	var mem Memtable.MemTable
+	mem = &s
+	mem.Put(p)
+
+	mem = &sk
+	mem.Put(p)
+
 	//fmt.Println(s)
 	//s.Put("a", []byte("nesto"), time.Now())
 	//s.Put("b", []byte("nesto"), time.Now())
