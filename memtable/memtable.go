@@ -13,7 +13,7 @@ type Data interface {
 }
 
 type Memtable struct {
-	RecordCapacity int
+	RecordCapacity int // TODO: Should this be number of elements or number of bytes?
 	Records        Data
 }
 
@@ -38,5 +38,6 @@ func (memtable *Memtable) Delete(key string) bool {
 }
 
 func Flush() {
-	// Call write to ssTable here
+	// TODO: Call write to ssTable here
+	// TODO: Clear memtable
 }

@@ -35,6 +35,13 @@ There are some Todo left in code that shows where things are meant to be impleme
 - [ ] Make function that returns bytes for index summary
 - [ ] Make function that returns bytes for index
 - [ ] Make function that creates one or more files based on config using above functions
+  
+#### Naming of ssTable
+
+  What should be naming convention for sstable and other files?
+  0_1_ssTable.bin ?
+  0_1_ssTableIndex.bin ?
+  0_1_ssTableSummary.bin ?
 
 ### BloomFilter
 
