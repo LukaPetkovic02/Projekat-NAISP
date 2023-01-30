@@ -1,11 +1,12 @@
 # Projekat-NAISP a
 
+## Structure
 
-## Structure 
 All files created by the app are located in .data folder
 .data is generated when app is ran
 
 ## Running App
+
 you can run app with
 
 ```make run```
@@ -13,17 +14,19 @@ or
 ```go run .```
 
 if you use make run, .data will be removed before running and created again by the app
+
 ## Tasks
+
 There are some Todo left in code that shows where things are meant to be implemented
+
 ### LRU
 
 - [ ] Create LRU cache
 - [ ] Create Add and Get methods in LRU cache
   
-
 ### SSTable
 
-- [ ] Make function that returns bytes for sstable 
+- [ ] Make function that returns bytes for sstable
 - [ ] Make function that returns bytes for index summary
 - [ ] Make function that returns bytes for index
 - [ ] Make function that creates one or more files based on config using above functions
@@ -35,7 +38,6 @@ There are some Todo left in code that shows where things are meant to be impleme
 - [ ] Make function that deserializes bloomFilter
 - [ ] Make function that checks if element is in bloomFilter
   
-
 ### Token Bucket
 
 - [ ] Create Token Bucket(this will be added to App->operations to Handle functions)
@@ -80,5 +82,3 @@ There are some Todo left in code that shows where things are meant to be impleme
 - Only expose(first letter capital) functions from packages that are used in other packages
   
 ### Collaboration
-
-  
