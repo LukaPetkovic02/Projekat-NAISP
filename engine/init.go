@@ -8,9 +8,9 @@ import (
 )
 
 func CreateDataFolderStructure() {
-	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir), 0755)
-	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultWriteAheadLogDir), 0755)
-	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir), 0755)
+	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir), 0777)
+	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultWriteAheadLogDir), 0777)
+	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir), 0777)
 }
 
 func GetWriteAheadLogDir() string {
@@ -45,8 +45,9 @@ func GetWalFilePathBefore(current string) string {
 	for i := 0; i < len(current); i++ {
 		if current[i] == '_' {
 			start = i + 1
-		} else if current[i] == '.' {
+		} else if current[i] == '.' && start != 0 {
 			end = i
+			break
 		}
 	}
 	lastFileNum, err := strconv.Atoi(current[start:end])

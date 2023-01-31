@@ -14,15 +14,14 @@ var segment_size int = 3
 
 func Append(record types.Record) bool {
 	// TODO: Open the file as memory mapped
-	file, err := os.OpenFile(engine.GetCurrentWalFilePath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
+	file, err := os.OpenFile(engine.GetCurrentWalFilePath(), os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
 		panic(err)
 	}
 	current_data := ReadWalSegment(*file)
-
-	if len(current_data) >= segment_size {
+	if len(current_data) == segment_size {
 		file.Close()
-		file, err = os.OpenFile(engine.GetNextWalFilePath(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
+		file, err = os.OpenFile(engine.GetNextWalFilePath(), os.O_RDWR|os.O_CREATE, 0777)
 		if err != nil {
 			panic(err)
 		}
@@ -75,7 +74,7 @@ func ReadWal() []types.Record {
 	current_filename := engine.GetCurrentWalFilePath()
 	var ret []types.Record
 	for current_filename != "" {
-		file, err := os.OpenFile(current_filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
+		file, err := os.OpenFile(current_filename, os.O_RDWR|os.O_CREATE, 0777)
 		if err != nil {
 			panic(err)
 		}
