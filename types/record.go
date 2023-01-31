@@ -3,6 +3,7 @@ package types
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"hash/crc32"
 	"time"
 )
@@ -13,6 +14,13 @@ const (
 	TOMBSTONE_SIZE  = 1
 	KEY_SIZE_SIZE   = 8
 	VALUE_SIZE_SIZE = 8
+
+	CRC_START        = 0
+	TIMESTAMP_START  = CRC_START + CRC_SIZE
+	TOMBSTONE_START  = TIMESTAMP_START + TIMESTAMP_SIZE
+	KEY_SIZE_START   = TOMBSTONE_START + TOMBSTONE_SIZE
+	VALUE_SIZE_START = KEY_SIZE_START + KEY_SIZE_SIZE
+	KEY_START        = VALUE_SIZE_START + VALUE_SIZE_SIZE
 )
 
 type Record struct {
@@ -51,6 +59,25 @@ func (record Record) Serialize() []byte {
 }
 
 func DeserializeRecord(serializedRecord []byte) Record {
-	// TODO: Implement this function
-	return Record{}
+	var ret Record
+
+	ret.CRC = binary.LittleEndian.Uint32(serializedRecord[CRC_START : CRC_START+CRC_SIZE])
+
+	ret.KeySize = binary.LittleEndian.Uint64(serializedRecord[KEY_SIZE_START : KEY_SIZE_START+KEY_SIZE_SIZE])
+
+	ret.ValueSize = binary.LittleEndian.Uint64(serializedRecord[VALUE_SIZE_START : VALUE_SIZE_START+VALUE_SIZE_SIZE])
+
+	ret.Key = fmt.Sprintf("%s", serializedRecord[KEY_START:KEY_START+ret.KeySize])
+
+	ret.Value = serializedRecord[KEY_START+ret.KeySize : KEY_START+ret.KeySize+ret.ValueSize]
+
+	ret.Timestamp = uint64(binary.LittleEndian.Uint64(serializedRecord[TIMESTAMP_START : TIMESTAMP_START+TIMESTAMP_SIZE]))
+
+	if serializedRecord[TOMBSTONE_START] == 1 {
+		ret.Tombstone = true
+	} else {
+		ret.Tombstone = false
+	}
+
+	return ret
 }
