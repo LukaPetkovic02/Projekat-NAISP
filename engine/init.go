@@ -39,7 +39,7 @@ func GetNextWalFilePath() string {
 	return filepath.Join(GetWriteAheadLogDir(), "wal_"+numberOfFiles+".log.bin")
 }
 
-func GetWalFilePathBefore(current string) string {
+func GetNextWalFile(current string) string {
 	var start int = 0
 	var end int = 0
 	for i := 0; i < len(current); i++ {
@@ -54,10 +54,8 @@ func GetWalFilePathBefore(current string) string {
 	if err != nil {
 		panic(err)
 	}
-	var numberOfFiles = strconv.Itoa(lastFileNum - 1)
-	if numberOfFiles == "0" {
-		return ""
-	}
+	var numberOfFiles = strconv.Itoa(lastFileNum + 1)
+
 	return filepath.Join(GetWriteAheadLogDir(), "wal_"+numberOfFiles+".log.bin")
 }
 

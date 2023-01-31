@@ -2,8 +2,8 @@ package wal
 
 import (
 	"io"
-	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
@@ -38,7 +38,7 @@ func Append(record types.Record) bool {
 	err = file.Truncate(file_size + 29 + (int64)(record.KeySize) + (int64)(record.ValueSize))
 	mmapFile, err := mmap.Map(file, mmap.RDWR, 0)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	copy(mmapFile[file_size:], record.Serialize())
@@ -71,12 +71,12 @@ func ReadWalSegment(file os.File) []types.Record {
 }
 
 func ReadWal() []types.Record {
-	current_filename := engine.GetCurrentWalFilePath()
+	var current_filename string = filepath.Join(engine.GetWriteAheadLogDir(), "wal_1.log.bin")
 	var ret []types.Record
 	for current_filename != "" {
-		file, err := os.OpenFile(current_filename, os.O_RDWR|os.O_CREATE, 0777)
+		file, err := os.OpenFile(current_filename, os.O_RDWR, 0777)
 		if err != nil {
-			panic(err)
+			break
 		}
 		current_data := ReadWalSegment(*file)
 		for i := 0; i < len(current_data); i++ {
@@ -84,7 +84,8 @@ func ReadWal() []types.Record {
 		}
 		file.Close()
 
-		current_filename = engine.GetWalFilePathBefore(current_filename)
+		current_filename = engine.GetNextWalFile(current_filename)
+
 	}
 	return ret
 }
