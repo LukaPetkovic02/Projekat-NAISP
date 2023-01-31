@@ -193,19 +193,22 @@ func (s *Stablo) Add(podatak types.Record) bool {
 
 	a, _ := s.search(podatak.Key)
 
-	if a != nil { //ako element vec postoji
-		/*x := s.Head
+	if a != nil { //ako element vec postoji izmeni ga
+		x := s.Head
 		t := true
 		var i int
 		for x != nil {
 			t = true
 			for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-				if podatak.Key == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+				if podatak.Key == x.Value[i].Key && x.Value[i].Tombstone == false {
 					x.Value[i].Value = podatak.Value
 					x.Value[i].Timestamp = podatak.Timestamp
 					x.Value[i].Tombstone = podatak.Tombstone
 					x.Value[i].Timestamp = podatak.Timestamp
-					return nil
+					x.Value[i].CRC = podatak.CRC
+					x.Value[i].KeySize = podatak.KeySize
+					x.Value[i].ValueSize = podatak.ValueSize
+					return true
 				} else if x.Value[i].Key > podatak.Key {
 					x = x.Children[i]
 					t = false
@@ -215,9 +218,9 @@ func (s *Stablo) Add(podatak types.Record) bool {
 			if t {
 				x = x.Children[i]
 			}
-		}*/
-		fmt.Println("That record already exists!")
-		return false
+		}
+		//fmt.Println("That record already exists!")
+		return true
 	}
 
 	if s.Cur_capacity >= s.Max_capacity {
@@ -358,7 +361,7 @@ func (s *Stablo) Add(podatak types.Record) bool {
 		}
 
 	}
-	SrediRoditelje(s.Head)
+	srediRoditelje(s.Head)
 	//proveri dal je popunjen kapacitet
 	s.Cur_capacity += 1
 	return true
@@ -371,12 +374,12 @@ func (s *Stablo) Add(podatak types.Record) bool {
 	}*/
 }
 
-func SrediRoditelje(x *Node) {
+func srediRoditelje(x *Node) {
 	if x != nil {
 		for i := 0; i < len(x.Children); i++ {
 			if x.Children[i] != nil {
 				x.Children[i].Parent = x
-				SrediRoditelje(x.Children[i])
+				srediRoditelje(x.Children[i])
 			}
 
 		}

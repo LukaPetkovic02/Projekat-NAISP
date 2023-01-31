@@ -29,7 +29,7 @@ func main() {
 	//skip lista testovi
 	var sk SkipList.SkipList
 	sk.InitSP(10, 5, 5)
-	sk.Put(p)
+	//sk.Put(p)
 	//B stablo testovi
 
 	var s Btree.Stablo
@@ -42,7 +42,7 @@ func main() {
 	fmt.Println("memtable kao stablo") //samo gledam dal radi
 	fmt.Println(mem)
 
-	mem = &sk
+	//mem = &sk
 	mem.Put(p)
 	fmt.Println("memtable kao skip lista")
 	fmt.Println(mem)

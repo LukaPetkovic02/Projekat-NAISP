@@ -3,7 +3,7 @@ package skipList
 import (
 	"fmt"
 	"math/rand"
-	Importi "projekat/utils"
+	"projekat/types"
 )
 
 type SkipList struct {
@@ -15,11 +15,11 @@ type SkipList struct {
 }
 
 type SkipListNode struct {
-	podatak Importi.Podatak
+	podatak types.Record
 	next    []*SkipListNode
 }
 
-func (s *SkipListNode) InitSP(podatak Importi.Podatak, level int) SkipListNode {
+func (s *SkipListNode) InitSP(podatak types.Record, level int) SkipListNode {
 	//s.key = key
 	//s.value = value
 	s.next = make([]*SkipListNode, level+1)
@@ -38,7 +38,7 @@ func (s *SkipList) InitSP(maxHeight int, height int, capacity int) SkipList {
 	return *s
 }
 
-func (s *SkipList) Roll() int {
+func (s *SkipList) roll() int {
 	level := 0
 	// possible ret values from rand are 0 and 1
 	// we stop shen we get a 0
@@ -56,11 +56,11 @@ func (s *SkipList) Roll() int {
 	return level
 }
 
-func (s *SkipList) Search(searchKey string) *SkipListNode { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
+func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && x.podatak.Tombstone != 1 {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
 			return x
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
@@ -70,11 +70,11 @@ func (s *SkipList) Search(searchKey string) *SkipListNode { //vraca vrednost koj
 	return nil
 }
 
-func (s *SkipList) SearchData(searchKey string) *Importi.Podatak { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
+func (s *SkipList) Get(searchKey string) *types.Record { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && x.podatak.Tombstone != 1 {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
 			return &x.podatak
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
@@ -84,10 +84,10 @@ func (s *SkipList) SearchData(searchKey string) *Importi.Podatak { //vraca vredn
 	return nil
 }
 
-func (s *SkipList) AllDataSortedBegin() []Importi.Podatak {
+func (s *SkipList) GetSortedRecordsList() []types.Record {
 	//ovde treba sortirati sve cvorove po kljucu i vratiti sortiranu listu cvorova
 	//cvorovi u skip listi su po difoltu sortirani tako da samo prolazim kroz najnizi nivo
-	sortNodeovi := []Importi.Podatak{}
+	sortNodeovi := []types.Record{}
 	x := s.head
 	for x != nil {
 		sortNodeovi = append(sortNodeovi, x.podatak)
@@ -98,8 +98,8 @@ func (s *SkipList) AllDataSortedBegin() []Importi.Podatak {
 	return sortNodeovi
 }
 
-func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
-	if s.Search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
+func (s *SkipList) Add(podatak types.Record) bool {
+	if s.search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
 		x := s.head
 		var i int
 		for i = s.height; i >= 0; i-- {
@@ -107,18 +107,25 @@ func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
 				x.podatak.Value = podatak.Value
 				x.podatak.Timestamp = podatak.Timestamp
 				x.podatak.Tombstone = podatak.Tombstone
-				return nil
+				x.podatak.CRC = podatak.CRC
+				x.podatak.KeySize = podatak.KeySize
+				x.podatak.ValueSize = podatak.ValueSize
+				return true
 			}
 			for x.next[i] != nil && x.next[i].podatak.Key <= podatak.Key {
 				x = x.next[i]
 			}
 		}
 	}
+
+	if s.size >= s.max_capacity {
+		return false
+	}
 	//inace dodaj
-	var pod Importi.Podatak
+	var pod types.Record
 	pod = podatak
 	var noviNode SkipListNode
-	noviNode.InitSP(pod, s.Roll())
+	noviNode.InitSP(pod, s.roll())
 	x := s.head
 	var i int
 
@@ -136,10 +143,31 @@ func (s *SkipList) Put(podatak Importi.Podatak) []Importi.Podatak {
 	s.size += 1
 	fmt.Println("Uspesno ubaceno!!!")
 
-	if s.size >= s.max_capacity {
-		fmt.Println("Skip lista je popunjena!")
-		return s.AllDataSortedBegin()
-	}
+	return true
+}
 
-	return nil
+func (s *SkipList) Delete(key string) bool {
+	a := s.search(key)
+	if a == nil {
+		return false
+	} else {
+		x := s.head
+		var i int
+		for i = s.height; i >= 0; i-- {
+			if x.podatak.Key == key && x.podatak.Tombstone == false {
+				x.podatak.Tombstone = true
+				return true
+			}
+			for x.next[i] != nil && x.next[i].podatak.Key <= key {
+				x = x.next[i]
+			}
+		}
+	}
+	return true
+}
+func (s *SkipList) Clear() {
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+}
+func (s *SkipList) GetSize() int {
+	return s.size
 }
