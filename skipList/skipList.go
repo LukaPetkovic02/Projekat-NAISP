@@ -3,248 +3,171 @@ package skipList
 import (
 	"fmt"
 	"math/rand"
-	"time"
-
-	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+	"projekat/types"
 )
 
 type SkipList struct {
-	maxHeight int
-	height    int
-	size      int
-	head      *SkipListNode
+	maxHeight    int
+	height       int
+	size         int
+	max_capacity int
+	head         *SkipListNode
 }
 
 type SkipListNode struct {
-	Key    string
-	Record types.Record
-	next   []*SkipListNode
+	podatak types.Record
+	next    []*SkipListNode
 }
 
-func NewSkipList(maxHeight int) *SkipList {
-
-	return &SkipList{
-		maxHeight: maxHeight,
-		height:    0,
-		size:      0,
-		head:      nil,
-	}
-
+func (s *SkipListNode) InitSP(podatak types.Record, level int) SkipListNode {
+	//s.key = key
+	//s.value = value
+	s.next = make([]*SkipListNode, level+1)
+	//s.tombstone = tomb
+	//s.timestamp = vreme.Unix()
+	s.podatak = podatak
+	return *s
 }
 
-func NewSkipListNode(key string, record types.Record, height int) *SkipListNode {
-
-	return &SkipListNode{
-		Key:    key,
-		Record: record,
-		next:   make([]*SkipListNode, height+1),
-	}
-
+func (s *SkipList) InitSP(maxHeight int, height int, capacity int) SkipList {
+	s.maxHeight = maxHeight
+	s.height = height
+	s.size = 0
+	s.head = &SkipListNode{next: make([]*SkipListNode, height+1)}
+	s.max_capacity = capacity
+	return *s
 }
 
 func (s *SkipList) roll() int {
-
 	level := 0
-
-	rand.Seed(time.Now().UnixNano())
-	for rand.Intn(2) == 1 {
-		level++
+	// possible ret values from rand are 0 and 1
+	// we stop shen we get a 0
+	for ; rand.Int31n(2) == 1; level++ {
 		if level >= s.maxHeight {
-			level = s.maxHeight - 1
-			break
+			if level > s.height {
+				s.height = level
+			}
+			return level
 		}
 	}
-
-	return level
-
-}
-
-func (s *SkipList) Get(key string) *types.Record {
-
-	return s.search(key)
-
-}
-
-func (s *SkipList) search(key string) *types.Record {
-
-	node := s.head
-	if node == nil {
-		return nil
-	}
-	for i := s.height; i >= 0; i-- {
-		for node.next[i] != nil && node.next[i].Key < key {
-			node = node.next[i]
-		}
-	}
-
-	node = node.next[0]
-	if node != nil && node.Key == key {
-		return &node.Record
-	}
-
-	return nil
-
-}
-
-func (s *SkipList) Add(key string, record types.Record) bool {
-
-	if key == "" || s.search(key) != nil {
-		return false
-	}
-	level := s.roll()
-	node := NewSkipListNode(key, record, s.maxHeight)
-
-	update := make([]*SkipListNode, s.maxHeight)
-	current := s.head
-	if current == nil {
-		s.head = node
-		return true
-	}
-	for i := s.height; i >= 0; i-- {
-		for current.next[i] != nil && current.next[i].Key < key {
-			current = current.next[i]
-		}
-		update[i] = current
-	}
-
-	for i := 0; i <= s.height; i++ {
-		node.next[i] = update[i].next[i]
-		update[i].next[i] = node
-	}
-
-	s.size++
 	if level > s.height {
 		s.height = level
 	}
+	return level
+}
+
+func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
+	x := s.head
+	var i int
+	for i = s.height; i >= 0; i-- {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+			return x
+		}
+		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
+			x = x.next[i]
+		}
+	}
+	return nil
+}
+
+func (s *SkipList) Get(searchKey string) *types.Record { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
+	x := s.head
+	var i int
+	for i = s.height; i >= 0; i-- {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+			return &x.podatak
+		}
+		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
+			x = x.next[i]
+		}
+	}
+	return nil
+}
+
+func (s *SkipList) GetSortedRecordsList() []types.Record {
+	//ovde treba sortirati sve cvorove po kljucu i vratiti sortiranu listu cvorova
+	//cvorovi u skip listi su po difoltu sortirani tako da samo prolazim kroz najnizi nivo
+	sortNodeovi := []types.Record{}
+	x := s.head
+	for x != nil {
+		sortNodeovi = append(sortNodeovi, x.podatak)
+		x = x.next[0]
+	}
+	//treba isprazniti listu kada se ona popuni
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+	return sortNodeovi
+}
+
+func (s *SkipList) Add(podatak types.Record) bool {
+	if s.search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
+		x := s.head
+		var i int
+		for i = s.height; i >= 0; i-- {
+			if x.podatak.Key == podatak.Key {
+				x.podatak.Value = podatak.Value
+				x.podatak.Timestamp = podatak.Timestamp
+				x.podatak.Tombstone = podatak.Tombstone
+				x.podatak.CRC = podatak.CRC
+				x.podatak.KeySize = podatak.KeySize
+				x.podatak.ValueSize = podatak.ValueSize
+				return true
+			}
+			for x.next[i] != nil && x.next[i].podatak.Key <= podatak.Key {
+				x = x.next[i]
+			}
+		}
+	}
+
+	if s.size >= s.max_capacity {
+		return false
+	}
+	//inace dodaj
+	var pod types.Record
+	pod = podatak
+	var noviNode SkipListNode
+	noviNode.InitSP(pod, s.roll())
+	x := s.head
+	var i int
+
+	for i = len(noviNode.next) - 1; i >= 0; i-- {
+		for x.next[i] != nil && x.next[i].podatak.Key < noviNode.podatak.Key {
+			x = x.next[i]
+		}
+
+		if x.next[i] != nil {
+			noviNode.next[i] = x.next[i]
+		}
+
+		x.next[i] = &noviNode
+	}
+	s.size += 1
+	fmt.Println("Uspesno ubaceno!!!")
 
 	return true
 }
 
-func (s *SkipList) Update(key string, record types.Record) bool {
-
-	node := s.head
-
-	for i := s.height; i >= 0; i-- {
-		for node.next[i] != nil && node.next[i].Key < key {
-			node = node.next[i]
-		}
-	}
-
-	node = node.next[0]
-	if node != nil && node.Key == key {
-		node.Record = record
-		return true
-	}
-
-	return false
-
-}
-
 func (s *SkipList) Delete(key string) bool {
-
-	update := make([]*SkipListNode, s.height+1)
-	current := s.head
-
-	for i := s.height; i >= 0; i-- {
-		for current.next[i] != nil && current.next[i].Key < key {
-			current = current.next[i]
-		}
-		update[i] = current
-	}
-
-	current = current.next[0]
-	if current != nil && current.Key == key {
-		current.Record.Tombstone = true
-		// for i := 0; i <= s.height; i++ {
-		// 	if update[i].next[i] != current {
-		// 		break
-		// 	}
-		// 	update[i].next[i] = current.next[i]
-		// }
-
-		// s.size--
-		// for s.height > 0 && s.head.next[s.height] == nil {
-		// 	s.height--
-		// }
-
-		// return true
-
-	}
-
-	return false
-}
-
-func (s *SkipList) PrintList() {
-
-	for i := s.height; i >= 0; i-- {
-		node := s.head
-		fmt.Printf("Level %d:\n", i)
-		for node.next[i] != nil {
-			node = node.next[i]
-			fmt.Printf("\tkey: %s, value: %s\n", node.Key)
+	a := s.search(key)
+	if a == nil {
+		return false
+	} else {
+		x := s.head
+		var i int
+		for i = s.height; i >= 0; i-- {
+			if x.podatak.Key == key && x.podatak.Tombstone == false {
+				x.podatak.Tombstone = true
+				return true
+			}
+			for x.next[i] != nil && x.next[i].podatak.Key <= key {
+				x = x.next[i]
+			}
 		}
 	}
-
+	return true
 }
-
-// func SkipListTest() {
-
-// 	skiplist := NewSkipList(6)
-
-// 	for {
-// 		var key string
-// 		var value string
-// 		fmt.Print("Enter new key (exit to stop): ")
-// 		fmt.Scan(&key)
-// 		if key == "exit" {
-// 			break
-// 		}
-// 		fmt.Print("Enter value: ")
-// 		fmt.Scan(&value)
-// 		inserted := skiplist.Insert(key, []byte(value))
-// 		if !inserted {
-// 			fmt.Println("Key '", key, "' already exists.")
-// 			continue
-// 		}
-// 		fmt.Printf("Inserted key-value pair: (%s, %s)\n", key, value)
-// 	}
-
-// 	skiplist.PrintList()
-
-// 	var keytoSearch string
-// 	fmt.Print("Enter key to search: ")
-// 	fmt.Scan(&keytoSearch)
-// 	value := skiplist.Search(keytoSearch)
-// 	if value != nil {
-// 		fmt.Println("Value of key '", keytoSearch, "' is:", string(value))
-// 	} else {
-// 		fmt.Println("Key '", keytoSearch, "' is not found.")
-// 	}
-
-// 	var keyToDelete string
-// 	fmt.Print("Enter key to delete: ")
-// 	fmt.Scan(&keyToDelete)
-// 	deleted := skiplist.Delete(keyToDelete)
-
-// 	if deleted {
-// 		fmt.Println("Deleted key '", keyToDelete, "'")
-// 	} else {
-// 		fmt.Println("Key '", keyToDelete, "' is not found.")
-// 	}
-
-// 	var keyToUpdate string
-// 	var newValue string
-// 	fmt.Print("Enter key to update: ")
-// 	fmt.Scan(&keyToUpdate)
-// 	fmt.Print("Enter new value: ")
-// 	fmt.Scan(&newValue)
-// 	updated := skiplist.Update(keyToUpdate, []byte(newValue))
-// 	if updated {
-// 		fmt.Println("Updated key '", keyToUpdate, "'", "with value:", newValue)
-// 	} else {
-// 		fmt.Println("Key '", keyToUpdate, "' is not found.")
-// 	}
-
-// 	skiplist.PrintList()
-
-// }
+func (s *SkipList) Clear() {
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+}
+func (s *SkipList) GetSize() int {
+	return s.size
+}

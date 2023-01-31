@@ -2,14 +2,13 @@ package memtable
 
 import "github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 
-// TODO: implement all commented methods in skipList and bTree
 type Data interface {
 	Get(key string) *types.Record
 	Add(key string, record types.Record) bool
-	// Delete(key string) bool
-	// GetSortedRecordsList() []types.Record
-	// Clear()
-	// GetSize() int
+	Delete(key string) bool
+	GetSortedRecordsList() []types.Record
+	Clear()
+	GetSize() int
 }
 
 type Memtable struct {
@@ -30,6 +29,9 @@ func (memtable *Memtable) Get(key string) *types.Record {
 
 func (memtable *Memtable) Add(key string, record types.Record) bool {
 	// TODO: Check if memtable is full if it is Flush it here
+	if memtable.Records.GetSize() == memtable.RecordCapacity {
+		Flush(memtable)
+	}
 	return memtable.Records.Add(key, record)
 }
 
@@ -37,7 +39,9 @@ func (memtable *Memtable) Delete(key string) bool {
 	return true
 }
 
-func Flush() {
+func Flush(memtable *Memtable) {
+	//sortedRecords:=memtable.Records.GetSortedRecordsList()
+
 	// TODO: Call write to ssTable here
-	// TODO: Clear memtable
+	memtable.Records.Clear()
 }
