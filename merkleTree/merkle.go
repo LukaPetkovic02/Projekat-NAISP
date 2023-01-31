@@ -4,6 +4,9 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"fmt"
+	"os"
+
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 )
 
 type MerkleRoot struct {
@@ -96,4 +99,14 @@ func Traverse_tree(root *Node) [][]byte {
 
 func Serialize_tree(hashed_nodes [][]byte) {
 
+	file, err := os.OpenFile(engine.GetMetaDataFilePath(), os.O_RDWR|os.O_CREATE, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, node := range hashed_nodes {
+		file.Write(node)
+	}
+
+	file.Close()
 }
