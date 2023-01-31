@@ -45,10 +45,10 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### BloomFilter
 
-- [.] Make helper functions for k and m of bloom
-- [.] Make function that returns bytes of populated bloomFilter
-- [.] Make function that deserializes bloomFilter
-- [.] Make function that checks if element is in bloomFilter
+- [+] Make helper functions for k and m of bloom
+- [+] Make function that returns bytes of populated bloomFilter
+- [+] Make function that deserializes bloomFilter
+- [+] Make function that checks if element is in bloomFilter
   
 ### Token Bucket
 
