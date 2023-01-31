@@ -11,6 +11,7 @@ func CreateDataFolderStructure() {
 	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir), 0777)
 	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultWriteAheadLogDir), 0777)
 	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir), 0777)
+	os.Mkdir(filepath.Join(DefaultDataPath, DefaultDataDir, DefaultMetaDataDir), 0777)
 }
 
 func GetWriteAheadLogDir() string {
@@ -61,4 +62,17 @@ func GetNextWalFile(current string) string {
 
 func GetSSTablePath() string {
 	return filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir)
+}
+
+func GetDataPath() string {
+	return filepath.Join(DefaultDataPath, DefaultDataDir, DefaultMetaDataDir)
+}
+
+func GetMetaDataFilePath() string {
+	_, err := ioutil.ReadDir(GetDataPath())
+	if err != nil {
+		panic(err)
+	}
+
+	return filepath.Join(GetDataPath(), "Metadata.txt")
 }
