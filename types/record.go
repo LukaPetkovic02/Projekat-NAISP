@@ -21,7 +21,7 @@ type Record struct {
 	Tombstone bool
 	KeySize   uint64
 	ValueSize uint64
-	Key       []byte
+	Key       string
 	Value     []byte
 }
 
@@ -32,7 +32,7 @@ func CreateRecord(key string, value []byte, tombstone bool) Record {
 		Tombstone: tombstone,
 		KeySize:   uint64(len(key)),
 		ValueSize: uint64(len(value)),
-		Key:       []byte(key),
+		Key:       key,
 		Value:     value,
 	}
 }
@@ -45,7 +45,7 @@ func (record Record) Serialize() []byte {
 	binary.Write(serializedRecord, binary.LittleEndian, record.Tombstone)
 	binary.Write(serializedRecord, binary.LittleEndian, record.KeySize)
 	binary.Write(serializedRecord, binary.LittleEndian, record.ValueSize)
-	binary.Write(serializedRecord, binary.LittleEndian, record.Key)
+	binary.Write(serializedRecord, binary.LittleEndian, []byte(record.Key))
 	binary.Write(serializedRecord, binary.LittleEndian, record.Value)
 	return serializedRecord.Bytes()
 }
