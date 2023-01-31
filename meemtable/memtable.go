@@ -42,6 +42,8 @@ func (memtable *Memtable) Delete(key string) bool {
 }
 
 func Flush(memtable *Memtable) {
+	//sortedRecords:=memtable.Records.GetSortedRecordsList()
+
 	// TODO: Call write to ssTable here
 	memtable.Records.Clear()
 }
