@@ -3,7 +3,8 @@ package skipList
 import (
 	"fmt"
 	"math/rand"
-	"projekat/types"
+
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 type SkipList struct {
