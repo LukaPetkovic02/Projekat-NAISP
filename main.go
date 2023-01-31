@@ -1,24 +1,16 @@
 package main
 
-//"github.com/LukaPetkovicSV16/Projekat-NAISP/App"
+import (
+	"fmt"
 
-//"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
-//"github.com/LukaPetkovicSV16/Projekat-NAISP/skipList"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+)
 
 func main() {
-	// x := types.CreateRecord("Nibba", []byte("Joe"), false)
-	// wal.Append(x)
-	// x = types.CreateRecord("jane", []byte("Joe"), false)
-	// wal.Append(x)
-	// x = types.CreateRecord("mot", []byte("Joe"), false)
-	// wal.Append(x)
-	// x = types.CreateRecord("Niuuuuubba", []byte("Joe"), false)
-	// wal.Append(x)
-	// x := types.CreateRecord("Giga", []byte("Joe"), false)
-	// wal.Append(x)
-	// y := wal.ReadWal()
-	// for i := 0; i < len(y); i++ {
-	// 	fmt.Println(y[i])
-	// }
+	engine.CreateDataFolderStructure()
+	// var memtable = memtable.Init(100, skipList.NewSkipList(7))
+	// // TODO: initialize LRU here and pass it to App
+	// App.TUI(memtable)
 
+	fmt.Println(engine.GetSSTableFilePath())
 }
