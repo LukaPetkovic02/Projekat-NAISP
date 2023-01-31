@@ -7,7 +7,8 @@ import (
 	Cms "projekat/countMinSketch"
 	Hajp "projekat/hajperll"
 	Lru "projekat/lru"
-	Memtable "projekat/meemtable"
+
+	//"projekat/meemtable"
 	SkipList "projekat/skipList"
 	Util "projekat/utils"
 	//"time"
@@ -24,8 +25,8 @@ func main() {
 	// fmt.Println(bloom.Podaci)
 	// fmt.Println(bloom.Search([]byte("wasd")))
 	// fmt.Println(bloom.Search([]byte("nesto drugo")))
-	var p Util.Podatak
-	p = Util.NewPodatak("1", []byte("bajtovi"), 0)
+	//var p Util.Podatak
+	//p = Util.NewPodatak("1", []byte("bajtovi"), 0)
 	//skip lista testovi
 	var sk SkipList.SkipList
 	sk.InitSP(10, 5, 5)
@@ -36,16 +37,16 @@ func main() {
 	s.InitSP(3, 10)
 
 	//testiranje memtablea
-	var mem Memtable.MemTable
+	//var mem MemTable
 	//mem = &s
-	mem.Put(p)
-	fmt.Println("memtable kao stablo") //samo gledam dal radi
-	fmt.Println(mem)
+	//mem.Put(p)
+	//fmt.Println("memtable kao stablo") //samo gledam dal radi
+	//fmt.Println(mem)
 
 	//mem = &sk
-	mem.Put(p)
-	fmt.Println("memtable kao skip lista")
-	fmt.Println(mem)
+	//mem.Put(p)
+	//fmt.Println("memtable kao skip lista")
+	//fmt.Println(mem)
 	//fmt.Println(s)
 	//s.Put("a", []byte("nesto"), time.Now())
 	//s.Put("b", []byte("nesto"), time.Now())
