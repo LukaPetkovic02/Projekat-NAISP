@@ -39,6 +39,27 @@ func GetNextWalFilePath() string {
 	return filepath.Join(GetWriteAheadLogDir(), "wal_"+numberOfFiles+".log.bin")
 }
 
+func GetWalFilePathBefore(current string) string {
+	var start int = 0
+	var end int = 0
+	for i := 0; i < len(current); i++ {
+		if current[i] == '_' {
+			start = i + 1
+		} else if current[i] == '.' {
+			end = i
+		}
+	}
+	lastFileNum, err := strconv.Atoi(current[start:end])
+	if err != nil {
+		panic(err)
+	}
+	var numberOfFiles = strconv.Itoa(lastFileNum - 1)
+	if numberOfFiles == "0" {
+		return ""
+	}
+	return filepath.Join(GetWriteAheadLogDir(), "wal_"+numberOfFiles+".log.bin")
+}
+
 func GetSSTablePath() string {
 	return filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir)
 }

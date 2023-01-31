@@ -70,3 +70,22 @@ func ReadWalSegment(file os.File) []types.Record {
 
 	return ret
 }
+
+func ReadWal() []types.Record {
+	current_filename := engine.GetCurrentWalFilePath()
+	var ret []types.Record
+	for current_filename != "" {
+		file, err := os.OpenFile(current_filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0777)
+		if err != nil {
+			panic(err)
+		}
+		current_data := ReadWalSegment(*file)
+		for i := 0; i < len(current_data); i++ {
+			ret = append(ret, current_data[i])
+		}
+		file.Close()
+
+		current_filename = engine.GetWalFilePathBefore(current_filename)
+	}
+	return ret
+}
