@@ -14,7 +14,7 @@ type LRUCache struct {
 
 func (lru *LRUCache) Add(rec types.Record) {
 
-	el, in := lru.Hash_Map[string(rec.Key)]
+	el, in := lru.Hash_Map[rec.Key]
 
 	if in {
 
@@ -22,10 +22,10 @@ func (lru *LRUCache) Add(rec types.Record) {
 		el.Value = rec
 	} else {
 
-		lru.Hash_Map[string(rec.Key)] = lru.Recent.PushFront(rec)
+		lru.Hash_Map[rec.Key] = lru.Recent.PushFront(rec)
 
 		if lru.LRU_Size < lru.Recent.Len() {
-			delete(lru.Hash_Map, string(lru.Recent.Back().Value.(types.Record).Key))
+			delete(lru.Hash_Map, lru.Recent.Back().Value.(types.Record).Key)
 			lru.Recent.Remove(lru.Recent.Back())
 		}
 
