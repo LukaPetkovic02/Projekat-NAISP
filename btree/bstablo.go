@@ -2,8 +2,8 @@ package btree
 
 import (
 	"fmt"
-	importi "projekat/utils"
-	"time"
+	//"time"
+	"projekat/types"
 )
 
 type Stablo struct {
@@ -14,17 +14,18 @@ type Stablo struct {
 }
 
 type Node struct {
-	Value    []importi.Podatak
+	Value    []types.Record
 	Children []*Node
 	Parent   *Node
 }
 
 func (s *Node) InitSP(Max int, Parent *Node) Node {
-	s.Value = make([]importi.Podatak, Max+1)
-	s.Value[0] = importi.Podatak{Key: "", Value: nil, Tombstone: 1, Timestamp: time.Now().Unix()} //inicijalizujemo prazan podatak u pocetku
-	s.Children = make([]*Node, Max+2)                                                             //jer ce kod podele cvorova u jednom momentu biti vise dece
+	s.Value = make([]types.Record, Max+1)
+	//s.Value[0] = types.Record{Key: "", Value: nil, Tombstone: 1, Timestamp: time.Now().Unix()} //inicijalizujemo prazan podatak u pocetku
+	s.Value[0] = types.CreateRecord("", nil, false)
+	s.Children = make([]*Node, Max+2) //jer ce kod podele cvorova u jednom momentu biti vise dece
 	s.Parent = Parent
-	s.Parent.Value = make([]importi.Podatak, Max+1)
+	s.Parent.Value = make([]types.Record, Max+1)
 	s.Parent.Children = make([]*Node, Max+2)
 	s.Parent.Children[0] = s
 	return *s
@@ -43,14 +44,15 @@ func (st *Stablo) InitSP(Max int, Max_capacity int) Stablo {
 	return *st
 }
 
-func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, ako ima vraca node i njegovu poziciju u nizu podataka u tom cvoru
+func (s *Stablo) search(SearchKey string) (*Node, int) { //ako nema vraca nil, ako ima vraca node i njegovu poziciju u nizu podataka u tom cvoru
 	x := s.Head
 	t := true
 	var i int
 	for x != nil {
 		t = true
 		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+			//byt:=[]byte(SearchKey)
+			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == false {
 				return x, i
 			} else if x.Value[i].Key > SearchKey {
 				x = x.Children[i]
@@ -65,14 +67,14 @@ func (s *Stablo) Search(SearchKey string) (*Node, int) { //ako nema vraca nil, a
 	return x, 0
 }
 
-func (s *Stablo) SearchData(SearchKey string) *importi.Podatak { //ako nema vraca nil, ako ima vraca podatak
+func (s *Stablo) Get(SearchKey string) *types.Record { //ako nema vraca nil, ako ima vraca podatak
 	x := s.Head
 	t := true
 	var i int
 	for x != nil {
 		t = true
-		for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
-			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == 0 {
+		for i = 0; i < len(x.Value)-1 && string(x.Value[i].Key) != ""; i++ {
+			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == false {
 				return &x.Value[i]
 			} else if x.Value[i].Key > SearchKey {
 				x = x.Children[i]
@@ -87,7 +89,7 @@ func (s *Stablo) SearchData(SearchKey string) *importi.Podatak { //ako nema vrac
 	return nil
 }
 
-func BrEl(Value []importi.Podatak) int {
+func brEl(Value []types.Record) int {
 	var i int
 
 	for i = 0; i < len(Value) && Value[i].Key != ""; i++ {
@@ -95,12 +97,12 @@ func BrEl(Value []importi.Podatak) int {
 	return i
 }
 
-func PodeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
+func podeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
 	var sredina int = Max / 2
 	x1 := new(Node) //pre sredine
-	x1.Value = make([]importi.Podatak, Max+1)
+	x1.Value = make([]types.Record, Max+1)
 	for i, p := range x1.Value {
-		p.InitPrazanPodatak()
+		p = types.CreateRecord("", nil, false)
 		x1.Value[i] = p
 	}
 	//x1.Value.Key = make([]string, Max+1)
@@ -112,18 +114,18 @@ func PodeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
 	}
 	//x1.Parent = x.Parent
 	x2 := new(Node) //sredina
-	x2.Value = make([]importi.Podatak, Max+1)
+	x2.Value = make([]types.Record, Max+1)
 	for i, p := range x2.Value {
-		p.InitPrazanPodatak()
+		p = types.CreateRecord("", nil, false)
 		x2.Value[i] = p
 	}
 	x2.Children = make([]*Node, Max+2)
 	//x2 ni ne treba da ima decu jer on svakako ide gore
 	//x2.Parent = x.Parent
 	x3 := new(Node) //posle sredine
-	x3.Value = make([]importi.Podatak, Max+1)
+	x3.Value = make([]types.Record, Max+1)
 	for i, p := range x3.Value {
-		p.InitPrazanPodatak()
+		p = types.CreateRecord("", nil, false)
 		x3.Value[i] = p
 	}
 	x3.Children = make([]*Node, Max+2)
@@ -140,7 +142,7 @@ func PodeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
 	//x2.Key[0] = x.Key[sredina]
 	//x2.Value[0] = x.Value[sredina]
 	x2.Value[0] = x.Value[sredina]
-	for i := sredina + 1; i < BrEl(x.Value); i++ {
+	for i := sredina + 1; i < brEl(x.Value); i++ {
 		//x3.Key[i-sredina-1] = x.Key[i]
 		//x3.Value[i-sredina-1] = x.Value[i]
 		x3.Value[i-sredina-1] = x.Value[i]
@@ -148,20 +150,51 @@ func PodeliCvor(x *Node, Max int) (*Node, *Node, *Node) {
 	return x1, x2, x3
 }
 
-func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
+func (s *Stablo) Delete(key string) bool {
+	a, _ := s.search(key)
+	if a != nil {
+		x := s.Head
+		t := true
+		var i int
+		for x != nil {
+			t = true
+			for i = 0; i < len(x.Value)-1 && x.Value[i].Key != ""; i++ {
+				if key == x.Value[i].Key && x.Value[i].Tombstone == false {
+					//x.Value[i].Value = podatak.Value
+					//x.Value[i].Timestamp = podatak.Timestamp
+					x.Value[i].Tombstone = true
+					//x.Value[i].Timestamp = podatak.Timestamp
+					return true
+				} else if x.Value[i].Key > key {
+					x = x.Children[i]
+					t = false
+					break
+				}
+			}
+			if t {
+				x = x.Children[i]
+			}
+		}
+		//return true
+	}
+	fmt.Println("Record with key ", key, " doesn't exist or his tombstone is already true!")
+	return false
+}
+
+func (s *Stablo) Add(podatak types.Record) bool {
 	if s.Head.Value[0].Key == "" { //ako je prazno stablo
 		//s.Head.Value[0].Key = addKey
 		//s.Head.Value[0].Value = addValue
 		//s.Head.Value[0].Tombstone = 0
 		//s.Head.Value[0].Timestamp = vreme.Unix()
 		s.Head.Value[0] = podatak
-		return nil
+		return true
 	}
 
-	a, _ := s.Search(podatak.Key)
+	a, _ := s.search(podatak.Key)
 
 	if a != nil { //ako element vec postoji
-		x := s.Head
+		/*x := s.Head
 		t := true
 		var i int
 		for x != nil {
@@ -182,7 +215,13 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 			if t {
 				x = x.Children[i]
 			}
-		}
+		}*/
+		fmt.Println("That record already exists!")
+		return false
+	}
+
+	if s.Cur_capacity >= s.Max_capacity {
+		return false
 	}
 
 	//ako ne postoji onda je dodavanje
@@ -205,51 +244,66 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 	}
 	temps := podatak.Key
 	tempb := podatak.Value
-	var tempt byte
+	var tempt bool
 	tempt = podatak.Tombstone
 	tempv := podatak.Timestamp
+	tempcrc := podatak.CRC
+	tempks := podatak.KeySize
+	tempvs := podatak.ValueSize
 	// kad nadjemo
-	for i = 0; i < BrEl(x.Value); i++ {
+	for i = 0; i < brEl(x.Value); i++ {
 		if temps < x.Value[i].Key {
 			x.Value[i].Key, temps = temps, x.Value[i].Key
 			x.Value[i].Value, tempb = tempb, x.Value[i].Value
 			x.Value[i].Tombstone, tempt = tempt, x.Value[i].Tombstone
 			x.Value[i].Timestamp, tempv = tempv, x.Value[i].Timestamp
+			x.Value[i].CRC, tempcrc = tempcrc, x.Value[i].CRC
+			x.Value[i].KeySize, tempks = tempks, x.Value[i].KeySize
+			x.Value[i].ValueSize, tempvs = tempvs, x.Value[i].ValueSize
 		}
 	}
 	x.Value[i].Key = temps
 	x.Value[i].Value = tempb
 	x.Value[i].Tombstone = tempt
 	x.Value[i].Timestamp = tempv
+	x.Value[i].CRC = tempcrc
+	x.Value[i].KeySize = tempks
+	x.Value[i].ValueSize = tempvs
 
 	//ako je doslo do overflowa radimo dodatno
-	if BrEl(x.Value) == len(x.Value) {
+	if brEl(x.Value) == len(x.Value) {
 		//if t { //ako ne postoji sibling koji nije popunjen
 		//uradi podelu cvorova
-		for BrEl(x.Value) == s.Max+1 { //dok je trenutni nivo popunjen
-			x1, x2, x3 := PodeliCvor(x, s.Max)
-			x.Value = make([]importi.Podatak, 0)
+		for brEl(x.Value) == s.Max+1 { //dok je trenutni nivo popunjen
+			x1, x2, x3 := podeliCvor(x, s.Max)
+			x.Value = make([]types.Record, 0)
 			for a := 0; a < len(x1.Value) && x1.Value[a].Key != ""; a++ {
 				x.Value = append(x.Value, x1.Value[a])
 			}
 			for a := 0; a < len(x3.Value) && x3.Value[a].Key != ""; a++ {
 				x.Value = append(x.Value, x3.Value[a])
 			}
-			var p importi.Podatak
-			p.InitPrazanPodatak()
+			var p types.Record
+			p = types.CreateRecord("", nil, false)
 			x.Value = append(x.Value, p)
 
 			tempk := x2.Value[0].Key //srednji ima samo jedan Key
 			tempv := x2.Value[0].Value
 			tempt := x2.Value[0].Tombstone
 			tempvr := x2.Value[0].Timestamp
+			tempcrc := x2.Value[0].CRC
+			tempks := x2.Value[0].KeySize
+			tempvs := x2.Value[0].ValueSize
 			j := 0
-			for j = 0; j < BrEl(x.Parent.Value); j++ { //srednji kljuc dajemo roditelju na odgovarajuce mesto
+			for j = 0; j < brEl(x.Parent.Value); j++ { //srednji kljuc dajemo roditelju na odgovarajuce mesto
 				if tempk < x.Parent.Value[j].Key {
 					x.Parent.Value[j].Key, tempk = tempk, x.Parent.Value[j].Key
 					x.Parent.Value[j].Value, tempv = tempv, x.Parent.Value[j].Value
 					x.Parent.Value[j].Tombstone, tempt = tempt, x.Parent.Value[j].Tombstone
 					x.Parent.Value[j].Timestamp, tempvr = tempvr, x.Parent.Value[j].Timestamp
+					x.Parent.Value[j].CRC, tempcrc = tempcrc, x.Parent.Value[j].CRC
+					x.Parent.Value[j].KeySize, tempks = tempks, x.Parent.Value[j].KeySize
+					x.Parent.Value[j].ValueSize, tempvs = tempvs, x.Parent.Value[j].ValueSize
 				}
 
 			}
@@ -257,6 +311,9 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 			x.Parent.Value[j].Value = tempv
 			x.Parent.Value[j].Tombstone = tempt
 			x.Parent.Value[j].Timestamp = tempvr
+			x.Parent.Value[j].CRC = tempcrc
+			x.Parent.Value[j].KeySize = tempks
+			x.Parent.Value[j].ValueSize = tempvs
 			//fmt.Println(x1.Parent)
 			//fmt.Println("roditelj nakon sredjivanja:", x.Parent)
 			x1.Parent = x.Parent
@@ -275,10 +332,10 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 		}
 		//na kraju postavljamo s.Head=x ako se koren rasformirao
 		isti := true
-		if BrEl(x.Value) != BrEl(s.Head.Parent.Value) {
+		if brEl(x.Value) != brEl(s.Head.Parent.Value) {
 			isti = false
 		} else {
-			for o := 0; o < BrEl(x.Value); o++ {
+			for o := 0; o < brEl(x.Value); o++ {
 				if x.Value[o].Key != s.Head.Parent.Value[o].Key {
 					isti = false
 				}
@@ -289,9 +346,9 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 			s.Head = x //samo ako je x jednak roditelju Heada
 			//ovde treba inicijalizovati prazan Parent
 			s.Head.Parent = new(Node)
-			var p importi.Podatak
-			p.InitPrazanPodatak()
-			s.Head.Parent.Value = make([]importi.Podatak, s.Max+1)
+			var p types.Record
+			p = types.CreateRecord("", nil, false)
+			s.Head.Parent.Value = make([]types.Record, s.Max+1)
 			s.Head.Parent.Value[0] = p
 			//s.Head.Parent.Value = append(s.Head.Parent.Value, )
 			//s.Head.Parent.Key = make([]string, s.Max+1)
@@ -304,13 +361,14 @@ func (s *Stablo) Put(podatak importi.Podatak) []importi.Podatak {
 	SrediRoditelje(s.Head)
 	//proveri dal je popunjen kapacitet
 	s.Cur_capacity += 1
-	if s.Cur_capacity == s.Max_capacity {
-		A1 := s.AllDataSortedBegin()
+	return true
+	/*if s.Cur_capacity == s.Max_capacity {
+		A1 := s.GetSortedRecordsList()
 		s.InitSP(s.Max, s.Max_capacity)
 		return A1
 	} else {
 		return nil
-	}
+	}*/
 }
 
 func SrediRoditelje(x *Node) {
@@ -326,7 +384,7 @@ func SrediRoditelje(x *Node) {
 	}
 }
 
-func Ispis(x *Node, nivo int) {
+/*func Ispis(x *Node, nivo int) {
 	if x != nil {
 		fmt.Print("nivo ", nivo, ":")
 		for j := 0; j < BrEl(x.Value); j++ {
@@ -340,26 +398,33 @@ func Ispis(x *Node, nivo int) {
 			}
 		}
 	}
-}
+}*/
 
-func (s *Stablo) AllDataSortedBegin() []importi.Podatak { //vraca listu sortiranih podataka
-	Value := make([]importi.Podatak, 0)
-	s.AllDataSorted(s.Head, &Value)
+func (s *Stablo) GetSortedRecordsList() []types.Record { //vraca listu sortiranih podataka
+	Value := make([]types.Record, 0)
+	s.GetSortedRecordsListFunc(s.Head, &Value)
 	s.InitSP(s.Max, s.Max_capacity) //isprazni stablo
 	return Value
 }
 
-func (s *Stablo) AllDataSorted(n *Node, Value *[]importi.Podatak) {
+func (s *Stablo) GetSortedRecordsListFunc(n *Node, Value *[]types.Record) {
 	if n == nil {
 		return
 	}
-	for i := 0; i < BrEl(n.Value); i++ {
+	for i := 0; i < brEl(n.Value); i++ {
 		if n.Children[0] != nil {
-			s.AllDataSorted(n.Children[i], Value)
+			s.GetSortedRecordsListFunc(n.Children[i], Value)
 		}
 		*Value = append(*Value, n.Value[i])
 	}
 	if n.Children[0] != nil {
-		s.AllDataSorted(n.Children[BrEl(n.Value)], Value)
+		s.GetSortedRecordsListFunc(n.Children[brEl(n.Value)], Value)
 	}
+}
+
+func (s *Stablo) Clear() {
+	s.InitSP(s.Max, s.Max_capacity)
+}
+func (s *Stablo) GetSize() int {
+	return s.Cur_capacity
 }

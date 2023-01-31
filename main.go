@@ -37,7 +37,7 @@ func main() {
 
 	//testiranje memtablea
 	var mem Memtable.MemTable
-	mem = &s
+	//mem = &s
 	mem.Put(p)
 	fmt.Println("memtable kao stablo") //samo gledam dal radi
 	fmt.Println(mem)
@@ -79,14 +79,10 @@ func main() {
 	fmt.Println("PRE")
 	//s.Put("a", []byte("promenjeno"), time.Now())
 	//s.Delete("a", time.Now())
-	sortirani := s.AllDataSortedBegin()
-	for i := 0; i < len(sortirani); i++ {
-		sortirani[i].PrintData()
-	}
 
-	Btree.Ispis(s.Head, 0)
-	v1, _ := s.Search("a")
-	v2, _ := s.Search("b")
+	//Btree.Ispis(s.Head, 0)
+	v1 := s.Get("a")
+	v2 := s.Get("b")
 	fmt.Println(v1)
 	fmt.Println(v2)
 

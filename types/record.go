@@ -21,7 +21,7 @@ type Record struct {
 	Tombstone bool
 	KeySize   uint64
 	ValueSize uint64
-	Key       []byte
+	Key       string
 	Value     []byte
 }
 
@@ -32,7 +32,7 @@ func CreateRecord(key string, value []byte, tombstone bool) Record {
 		Tombstone: tombstone,
 		KeySize:   uint64(len(key)),
 		ValueSize: uint64(len(value)),
-		Key:       []byte(key),
+		Key:       key,
 		Value:     value,
 	}
 }
