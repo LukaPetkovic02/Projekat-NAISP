@@ -61,12 +61,12 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### bTree
 
-- [ ] Implement bTree
-- [ ] Make bTree implement memtable interface
+- [+] Implement bTree
+- [+] Make bTree implement memtable interface
 
 ### skipList
 
-- [ ] Add missing functions to skipList to implement memtable interface
+- [+] Add missing functions to skipList to implement memtable interface
 
 ### LSM
 
