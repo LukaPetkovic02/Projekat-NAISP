@@ -56,8 +56,8 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### WAL
 
-- [ ] Create function for reading wal file
-- [ ] Opening file should as memory mapped file
+- [+] Create function for reading wal file
+- [+] Opening file should as memory mapped file
 
 ### bTree
 
