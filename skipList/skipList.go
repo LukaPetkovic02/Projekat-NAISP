@@ -166,9 +166,11 @@ func (s *SkipList) Delete(key string) bool {
 	}
 	return true
 }
+
 func (s *SkipList) Clear() {
 	s.InitSP(s.maxHeight, s.height, s.max_capacity)
 }
+
 func (s *SkipList) GetSize() int {
 	return s.size
 }

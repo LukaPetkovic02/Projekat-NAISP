@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/utils"
 )
@@ -116,22 +115,18 @@ func Deserialize(data []byte) *BloomFilter {
 
 	m := data[M_START : M_START+M_SIZE]
 	bloom.M = uint(binary.LittleEndian.Uint64(m))
-	fmt.Println(bloom.M)
 
 	k := data[K_START : K_START+K_SIZE]
 	bloom.K = uint(binary.LittleEndian.Uint64(k))
-	fmt.Println(bloom.K)
 
 	for i := 0; i < int(bloom.K); i++ {
 		hash := new(utils.HashWithSeed)
 		hash.Seed = data[HASH_START+HASH_SIZE*i : HASH_START+HASH_SIZE*(i+1)]
-		fmt.Println(hash.Seed)
 		bloom.Fns = append(bloom.Fns, *hash)
 	}
 
 	podaci_start := HASH_START + HASH_SIZE*int(bloom.K)
 	bloom.Podaci = data[podaci_start : podaci_start+int(bloom.M)]
-	fmt.Println(bloom.Podaci)
 
 	return bloom
 }
