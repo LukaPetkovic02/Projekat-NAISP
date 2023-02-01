@@ -1,6 +1,8 @@
 package hll
 
 import (
+	"bytes"
+	"encoding/binary"
 	"math"
 	"math/bits"
 
@@ -10,6 +12,12 @@ import (
 const (
 	HLL_MIN_PRECISION = 4
 	HLL_MAX_PRECISION = 16
+	HLL_M_START       = 0
+	HLL_M_SIZE        = 8
+	HLL_P_START       = HLL_M_START + HLL_M_SIZE
+	HLL_P_SIZE        = 1
+	HLL_REG_START     = HLL_P_START + HLL_P_SIZE
+	HLL_REG_SIZE      = 1
 )
 
 type HLL struct {
@@ -18,6 +26,7 @@ type HLL struct {
 	reg []uint8
 }
 
+// p1 je broj bitova u baketu
 func NewHLL(p1 uint8) *HLL {
 	p := new(HLL)
 	p.p = p1
@@ -64,4 +73,27 @@ func (hll *HLL) emptyCount() int {
 		}
 	}
 	return sum
+}
+
+func (hll *HLL) Serialize() []byte {
+	var serializedRecord = new(bytes.Buffer)
+
+	binary.Write(serializedRecord, binary.LittleEndian, hll.m)
+	binary.Write(serializedRecord, binary.LittleEndian, hll.p)
+	binary.Write(serializedRecord, binary.LittleEndian, hll.reg)
+	return serializedRecord.Bytes()
+}
+
+func DeSerialize(data []byte) HLL {
+	var ret HLL
+
+	ret.m = binary.LittleEndian.Uint64(data[HLL_M_START : HLL_M_START+HLL_M_SIZE])
+	ret.p = data[HLL_M_START]
+	ret.reg = data[HLL_REG_START : HLL_REG_START+ret.m*HLL_REG_SIZE]
+
+	return ret
+}
+
+func (hll *HLL) GetReq() []uint8 {
+	return hll.reg
 }
