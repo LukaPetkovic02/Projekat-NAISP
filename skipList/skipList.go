@@ -8,11 +8,11 @@ import (
 )
 
 type SkipList struct {
-	maxHeight int
-	height    int
-	size      int
-	// max_capacity int
-	head *SkipListNode
+	maxHeight    int
+	height       int
+	size         int
+	max_capacity int
+	head         *SkipListNode
 }
 
 type SkipListNode struct {
@@ -30,12 +30,12 @@ func (s *SkipListNode) InitSP(podatak types.Record, level int) SkipListNode {
 	return *s
 }
 
-func (s *SkipList) InitSP(maxHeight int, height int) SkipList {
+func (s *SkipList) InitSP(maxHeight int, height int, capacity int) SkipList {
 	s.maxHeight = maxHeight
 	s.height = height
 	s.size = 0
-	s.head = nil
-	// s.max_capacity = capacity
+	s.head = &SkipListNode{next: make([]*SkipListNode, height+1)}
+	s.max_capacity = capacity
 	return *s
 }
 
@@ -61,7 +61,7 @@ func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koj
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && !x.podatak.Tombstone {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
 			return x
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
@@ -72,7 +72,17 @@ func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koj
 }
 
 func (s *SkipList) Get(searchKey string) *types.Record { //vraca vrednost koja odgovara kljucu(ako postoji), ako ne postoji vraca nil
-	return &s.search(searchKey).podatak
+	x := s.head
+	var i int
+	for i = s.height; i >= 0; i-- {
+		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+			return &x.podatak
+		}
+		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
+			x = x.next[i]
+		}
+	}
+	return nil
 }
 
 func (s *SkipList) GetSortedRecordsList() []types.Record {
@@ -84,16 +94,12 @@ func (s *SkipList) GetSortedRecordsList() []types.Record {
 		sortNodeovi = append(sortNodeovi, x.podatak)
 		x = x.next[0]
 	}
-	return sortNodeovi
+	//treba isprazniti listu kada se ona popuni
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+	return sortNodeovi[1:]
 }
 
 func (s *SkipList) Add(podatak types.Record) bool {
-	if s.head == nil {
-		s.head = new(SkipListNode)
-		s.head.InitSP(podatak, s.maxHeight)
-		s.size++
-		return true
-	}
 	if s.search(podatak.Key) != nil { //ako podatak s tim kljucem vec postoji samo ga izmeni
 		x := s.head
 		var i int
@@ -113,11 +119,12 @@ func (s *SkipList) Add(podatak types.Record) bool {
 		}
 	}
 
-	// if s.size >= s.max_capacity {
-	// 	return false
-	// }
+	if s.size >= s.max_capacity {
+		return false
+	}
 	//inace dodaj
-	var pod types.Record = podatak
+	var pod types.Record
+	pod = podatak
 	var noviNode SkipListNode
 	noviNode.InitSP(pod, s.roll())
 	x := s.head
@@ -148,7 +155,7 @@ func (s *SkipList) Delete(key string) bool {
 		x := s.head
 		var i int
 		for i = s.height; i >= 0; i-- {
-			if x.podatak.Key == key && !x.podatak.Tombstone {
+			if x.podatak.Key == key && x.podatak.Tombstone == false {
 				x.podatak.Tombstone = true
 				return true
 			}
@@ -159,9 +166,11 @@ func (s *SkipList) Delete(key string) bool {
 	}
 	return true
 }
+
 func (s *SkipList) Clear() {
-	s.InitSP(s.maxHeight, s.height)
+	s.InitSP(s.maxHeight, s.height, s.max_capacity)
 }
+
 func (s *SkipList) GetSize() int {
 	return s.size
 }

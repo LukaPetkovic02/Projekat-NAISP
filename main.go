@@ -10,8 +10,9 @@ import (
 func main() {
 	engine.CreateDataFolderStructure()
 	var sl = &skipList.SkipList{}
+	// sl.InitSP(10, 10)
+	// var hash = memtable.InitHash()
 	sl.InitSP(10, 10, 100)
-	// sl = sl.InitSP(10, 10, 100)
 	var memtable = memtable.Init(100, sl)
 	// // TODO: initialize LRU here and pass it to App
 	App.TUI(memtable)
