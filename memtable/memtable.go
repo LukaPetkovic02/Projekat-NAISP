@@ -1,14 +1,13 @@
 package memtable
 
 import (
-	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 type Data interface {
 	Get(key string) *types.Record
-	Add(key string, record types.Record) bool
+	Add(record types.Record) bool
 	Delete(key string) bool
 	GetSortedRecordsList() []types.Record
 	Clear()
@@ -31,11 +30,15 @@ func (memtable *Memtable) Get(key string) *types.Record {
 	return memtable.Records.Get(key)
 }
 
-func (memtable *Memtable) Add(key string, record types.Record) bool {
-	if memtable.MaxSize <= memtable.Records.GetSize()+engine.DEFAULT_MEMTABLE_THRESHOLD {
+func (memtable *Memtable) Add(record types.Record) bool {
+	// if memtable.MaxSize <= memtable.Records.GetSize()+engine.DEFAULT_MEMTABLE_THRESHOLD {
+	println("Memtable size: ", memtable.Records.GetSize())
+	if memtable.Records.GetSize() > 2 {
 		memtable.Flush()
 	}
-	return memtable.Records.Add(key, record)
+	// memtable.Flush()
+	// }
+	return memtable.Records.Add(record)
 }
 
 func (memtable *Memtable) Delete(key string) bool {

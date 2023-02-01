@@ -10,7 +10,7 @@ func HandleAdd(key string, value []byte, memtable *memtable.Memtable) {
 	// TODO: check if request can be made with token bucket
 	var newRecord = types.CreateRecord(key, value, false)
 	if wal.Append(newRecord) {
-		memtable.Add(key, newRecord)
+		memtable.Add(newRecord)
 	}
 }
 func HandleGet(key string, memtable *memtable.Memtable) *types.Record {

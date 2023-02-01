@@ -61,7 +61,7 @@ func (s *SkipList) search(searchKey string) *SkipListNode { //vraca vrednost koj
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+		if x.podatak.Key == searchKey && !x.podatak.Tombstone {
 			return x
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
@@ -75,7 +75,7 @@ func (s *SkipList) Get(searchKey string) *types.Record { //vraca vrednost koja o
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+		if x.podatak.Key == searchKey && !x.podatak.Tombstone {
 			return &x.podatak
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
@@ -94,8 +94,6 @@ func (s *SkipList) GetSortedRecordsList() []types.Record {
 		sortNodeovi = append(sortNodeovi, x.podatak)
 		x = x.next[0]
 	}
-	//treba isprazniti listu kada se ona popuni
-	s.InitSP(s.maxHeight, s.height, s.max_capacity)
 	return sortNodeovi
 }
 
@@ -123,8 +121,7 @@ func (s *SkipList) Add(podatak types.Record) bool {
 		return false
 	}
 	//inace dodaj
-	var pod types.Record
-	pod = podatak
+	var pod types.Record = podatak
 	var noviNode SkipListNode
 	noviNode.InitSP(pod, s.roll())
 	x := s.head
@@ -155,7 +152,7 @@ func (s *SkipList) Delete(key string) bool {
 		x := s.head
 		var i int
 		for i = s.height; i >= 0; i-- {
-			if x.podatak.Key == key && x.podatak.Tombstone == false {
+			if x.podatak.Key == key && !x.podatak.Tombstone {
 				x.podatak.Tombstone = true
 				return true
 			}

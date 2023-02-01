@@ -1,12 +1,16 @@
 package sstable
 
 import (
+	"fmt"
+
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 // TODO: Get config from config file and check if single or multiple files are to be written
 // TODO: Add default config in engine->constants.go
 func Create(listOfRecords []types.Record) {
+	var indexes = CreateIndex(listOfRecords)
+	fmt.Println(indexes)
 	// Get index bytes
 	// Get index summary bytes
 	// Get bloomFilter bytes

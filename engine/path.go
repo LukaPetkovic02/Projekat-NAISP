@@ -1,6 +1,7 @@
 package engine
 
 func GetSSTableFilePath() string {
+	return ""
 	// var directoryPath = GetSSTableDirPath()
 	// var files, _ = ioutil.ReadDir(directoryPath)
 	// var level = 1 // All files are added to same level i think it is level 1?
