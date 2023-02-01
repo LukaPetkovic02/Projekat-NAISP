@@ -85,8 +85,8 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### Other
 
-- [ ] Make function for deserializing Record (in types->record.go) (need this for wal read)
-- [ ] Change how wal file is created
+- [+] Make function for deserializing Record (in types->record.go) (need this for wal read)
+- [+] Change how wal file is created
 
 ### Note
 
