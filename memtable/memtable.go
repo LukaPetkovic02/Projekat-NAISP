@@ -1,6 +1,10 @@
 package memtable
 
-import "github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+import (
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+)
 
 type Data interface {
 	Get(key string) *types.Record
@@ -12,14 +16,14 @@ type Data interface {
 }
 
 type Memtable struct {
-	RecordCapacity int // TODO: Should this be number of elements or number of bytes?
-	Records        Data
+	MaxSize int // Max size of memtable in bytes
+	Records Data
 }
 
-func Init(recordCapacity int, records Data) *Memtable {
+func Init(maxSize int, records Data) *Memtable {
 	return &Memtable{
-		RecordCapacity: recordCapacity,
-		Records:        records,
+		MaxSize: maxSize,
+		Records: records,
 	}
 }
 
@@ -28,20 +32,18 @@ func (memtable *Memtable) Get(key string) *types.Record {
 }
 
 func (memtable *Memtable) Add(key string, record types.Record) bool {
-	// TODO: Check if memtable is full if it is Flush it here
-	if memtable.Records.GetSize() == memtable.RecordCapacity {
-		Flush(memtable)
+	if memtable.MaxSize <= memtable.Records.GetSize()+engine.DEFAULT_MEMTABLE_THRESHOLD {
+		memtable.Flush()
 	}
 	return memtable.Records.Add(key, record)
 }
 
 func (memtable *Memtable) Delete(key string) bool {
-	return true
+	return memtable.Records.Delete(key)
 }
 
-func Flush(memtable *Memtable) {
-	//sortedRecords:=memtable.Records.GetSortedRecordsList()
-
-	// TODO: Call write to ssTable here
+func (memtable *Memtable) Flush() {
+	var records = memtable.Records.GetSortedRecordsList()
+	sstable.Create(records)
 	memtable.Records.Clear()
 }
