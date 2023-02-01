@@ -21,13 +21,13 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### LRU
 
-- [ ] Create LRU cache
-- [ ] Create Add and Get methods in LRU cache
+- [+] Create LRU cache
+- [+] Create Add and Get methods in LRU cache
   
 ### Merkle Tree
 
-- [ ] Implement functions for merkle tree
-- [ ] Implement functions for writing Metadata.txt
+- [+] Implement functions for merkle tree
+- [+] Implement functions for writing Metadata.txt
 
 ### SSTable
 
