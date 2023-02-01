@@ -94,7 +94,6 @@ func Traverse_tree(root *Node) [][]byte {
 	}
 
 	return hashed_nodes
-
 }
 
 func Serialize_tree(hashed_nodes [][]byte) {
