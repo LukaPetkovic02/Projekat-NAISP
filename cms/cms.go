@@ -106,7 +106,10 @@ func (c *CountMinSketch) Serialize() []byte {
 	for _, fn := range c.Fns {
 		binary.Write(serializedCms, binary.LittleEndian, fn.Seed)
 	}
-	binary.Write(serializedCms, binary.LittleEndian, c.Data)
+	for _, f := range c.Data {
+		binary.Write(serializedCms, binary.LittleEndian, f)
+	}
+	//binary.Write(serializedCms, binary.LittleEndian, c.Data)
 	return serializedCms.Bytes()
 }
 
@@ -128,6 +131,8 @@ func Deserialize(data []byte) *CountMinSketch {
 		cms.Data = append(cms.Data, data[data_start:data_start+int(cms.M)])
 		data_start = data_start + int(cms.M)
 	}
-
+	var buff = &bytes.Buffer{}
+	cms.Encoder = gob.NewEncoder(buff)
+	cms.Decoder = gob.NewDecoder(buff)
 	return cms
 }
