@@ -20,7 +20,8 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 			HandleAdd(key, []byte(value), memtable, LRU)
 		case "2":
 			key := getKey()
-			HandleGet(key, memtable, LRU)
+			var record = HandleGet(key, memtable, LRU)
+			fmt.Println(record)
 		case "3":
 			key := getKey()
 			HandleDelete(key, memtable)

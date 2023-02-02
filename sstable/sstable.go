@@ -92,21 +92,18 @@ func readFromMultipleFiles(key string) *types.Record {
 		if err != nil {
 			panic(err)
 		}
-		var index = ReadIndex(file, offset.Offset)
+		var index = ReadIndex(file, offset.Offset, key)
 		fmt.Println(index)
 		possibleIndexes = append(possibleIndexes, index)
 	}
 	fmt.Println(possibleIndexes)
 	for i, index := range possibleIndexes {
-		fmt.Println("Index iz:", index)
 		var file, err = os.OpenFile(filepath.Join(engine.GetSSTablePath(), possibleFiles[i]), os.O_RDONLY, 0666)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Offset:", int64(index.Offset))
-		file.Seek(0, 0)
+		file.Seek(int64(index.Offset), 0)
 		var record = types.ReadRecord(file)
-		fmt.Println(record)
 		if record.Key == key && (returnRecord == nil || record.Timestamp > returnRecord.Timestamp) {
 			returnRecord = &record
 		}
