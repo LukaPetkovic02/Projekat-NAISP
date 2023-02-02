@@ -35,6 +35,9 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	indexes := CreateIndexes(listOfRecords, 0)
 	summary := CreateSummary(listOfRecords, 0)
 	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), engine.DEFAULT_FILTER_PRECISION)
+	for _, record := range listOfRecords {
+		filter.Add([]byte(record.Key))
+	}
 	file, err := os.OpenFile(engine.GetNextTableFilePath(), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -51,6 +54,7 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(summary)
 	file.Write(summary.Serialize())
 
 	file, err = os.OpenFile(engine.GetNextBloomFilterPath(), os.O_WRONLY|os.O_CREATE, 0666)
@@ -77,11 +81,50 @@ func convertRecordsToBytes(listOfRecords []types.Record) []byte {
 // TODO: Load only part of summary file into memory
 
 func readFromMultipleFiles(key string) *types.Record {
+	var possibleFiles = CheckBloomFilter(key)
+	var possibleIndexesOffsets = checkSummary(key, possibleFiles)
+	var returnRecord *types.Record = nil
+	var possibleIndexes = make([]Index, 0)
+	fmt.Println(possibleIndexesOffsets)
+	for i, offset := range possibleIndexesOffsets {
+		fmt.Println(i, offset)
+		var file, err = os.OpenFile(filepath.Join(engine.GetIndexFilePath(), possibleFiles[i]), os.O_RDONLY, 0666)
+		if err != nil {
+			panic(err)
+		}
+		var index = ReadIndex(file, offset.Offset)
+		fmt.Println(index)
+		possibleIndexes = append(possibleIndexes, index)
+	}
+	fmt.Println(possibleIndexes)
+	for i, index := range possibleIndexes {
+		fmt.Println("Index iz:", index)
+		var file, err = os.OpenFile(filepath.Join(engine.GetSSTablePath(), possibleFiles[i]), os.O_RDONLY, 0666)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Offset:", int64(index.Offset))
+		file.Seek(0, 0)
+		var record = types.ReadRecord(file)
+		fmt.Println(record)
+		if record.Key == key && (returnRecord == nil || record.Timestamp > returnRecord.Timestamp) {
+			returnRecord = &record
+		}
+	}
+
+	return returnRecord
+}
+
+func readFromSingleFile(key string) *types.Record {
+	return nil
+}
+
+func CheckBloomFilter(key string) []string {
 	files, err := os.ReadDir(engine.GetBloomFilterPath())
 	if err != nil {
 		panic(err)
 	}
-	// var possibleFiles = make([]string, 0)
+	var possibleFiles = make([]string, 0)
 	for _, file := range files {
 		var path = filepath.Join(engine.GetBloomFilterPath(), file.Name())
 		var filterBytes, err = ioutil.ReadFile(path)
@@ -89,15 +132,10 @@ func readFromMultipleFiles(key string) *types.Record {
 			panic(err)
 		}
 		var filter = bloomFilter.Deserialize(filterBytes)
-		fmt.Println("Filter: ", filter.Get([]byte(key)))
-		// if filter.Get([]byte(key)) {
-		// 	possibleFiles = append(possibleFiles, file.Name())
-		// }
-		// fmt.Println("File: ", possibleFiles)
+		var actualFilter = bloomFilter.RecreateBloomFilterBloomFilter(filter.M, filter.K, filter.Fns, filter.Podaci)
+		if actualFilter.Get([]byte(key)) {
+			possibleFiles = append(possibleFiles, file.Name())
+		}
 	}
-	return nil
-}
-
-func readFromSingleFile(key string) *types.Record {
-	return nil
+	return possibleFiles
 }

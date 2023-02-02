@@ -3,6 +3,7 @@ package sstable
 import (
 	"bytes"
 	"encoding/binary"
+	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
@@ -64,4 +65,17 @@ func DeserializeIndexes(serializedIndexes []byte) Indexes {
 	}
 
 	return indexes
+}
+
+func ReadIndex(file *os.File, offset uint64) Index {
+	var index Index
+
+	file.Seek(int64(offset), 0)
+	binary.Read(file, binary.LittleEndian, &index.KeySize)
+	var b = make([]byte, index.KeySize)
+	file.Read(b)
+	index.Key = string(b)
+	binary.Read(file, binary.LittleEndian, &index.Offset)
+
+	return index
 }

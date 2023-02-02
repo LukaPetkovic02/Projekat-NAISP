@@ -72,6 +72,9 @@ func GetNextFileIndex(dir string) string {
 	if err != nil {
 		panic(err)
 	}
+	if len(files) == 0 {
+		return "1"
+	}
 	return strconv.Itoa(len(files))
 }
 
@@ -114,4 +117,8 @@ func GetNextBloomFilterPath() string {
 
 func GetNextSummaryFilePath() string {
 	return filepath.Join(GetSummaryFilePath(), "1_"+GetNextFileIndex(GetSummaryFilePath())+"_table.bin")
+}
+
+func GetNextSummaryFilePathByFilename(filename string) string {
+	return filepath.Join(GetSummaryFilePath(), filename)
 }
