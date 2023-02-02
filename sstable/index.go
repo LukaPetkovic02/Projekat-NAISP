@@ -3,7 +3,6 @@ package sstable
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
@@ -16,11 +15,10 @@ type Index struct {
 
 type Indexes []Index
 
-func CreateIndexes(records []types.Record) Indexes {
+func CreateIndexes(records []types.Record, startOffset uint64) Indexes {
 	var indexes []Index = make([]Index, len(records))
-	var offset uint64 = 0
+	var offset uint64 = startOffset
 	for i, record := range records {
-		fmt.Println(i, record)
 		indexes[i].Key = record.Key
 		indexes[i].KeySize = record.KeySize
 		indexes[i].Offset = offset
@@ -58,7 +56,6 @@ func (indexes Indexes) Serialize() []byte {
 	return serializedIndexes.Bytes()
 }
 
-// TODO: fix this function
 func DeserializeIndexes(serializedIndexes []byte) Indexes {
 	var indexes []Index = make([]Index, 0)
 

@@ -3,8 +3,9 @@ package sstable
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"os"
+
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 // TODO: write functions that return []byte that will be written to the file
@@ -17,12 +18,15 @@ type Summary struct {
 	Indexes      Indexes
 }
 
-func CreateSummary(indexes Indexes) Summary {
+func CreateSummary(listOfRecords []types.Record, initialOffset uint64) Summary {
+	var indexes = CreateIndexes(listOfRecords, initialOffset)
 
 	return Summary{
-		StartKey: indexes[0].Key,
-		EndKey:   indexes[len(indexes)-1].Key,
-		Indexes:  indexes,
+		StartKeySize: uint64(len(indexes[0].Key)),
+		EndKeySize:   uint64(len(indexes[len(indexes)-1].Key)),
+		StartKey:     indexes[0].Key,
+		EndKey:       indexes[len(indexes)-1].Key,
+		Indexes:      indexes,
 	}
 
 }
@@ -37,13 +41,6 @@ func (summary Summary) Serialize() []byte {
 	binary.Write(serializedSummary, binary.LittleEndian, summary.Indexes.Serialize())
 
 	return serializedSummary.Bytes()
-}
-
-func isKeyInSummary(key string, summary Summary) bool {
-	if key >= summary.StartKey && key <= summary.EndKey {
-		return true
-	}
-	return false
 }
 
 func DeserializeSummary(serializedSummary []byte) Summary {
@@ -76,7 +73,9 @@ func isKeyInSummaryFile(key string, file *os.File) bool {
 	file.Read(startKey)
 	file.Read(endKey)
 
-	fmt.Println(string(startKey), string(endKey))
-
+	if key >= string(startKey) && key <= string(endKey) {
+		return true
+	}
 	return false
+
 }
