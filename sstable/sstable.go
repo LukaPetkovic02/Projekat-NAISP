@@ -14,14 +14,14 @@ import (
 // TODO: Get config from config file and check if single or multiple files are to be written
 // TODO: Add default config in engine->constants.go
 func Create(listOfRecords []types.Record) {
-	if true {
+	if config.Values.Structure == "multiple-files" {
 		writeToMultipleFiles(listOfRecords)
 	} else {
 		writeToSingleFile(listOfRecords)
 	}
 }
 func Read(key string) *types.Record {
-	if true {
+	if config.Values.Structure == "multiple-files" {
 		var record = readFromMultipleFiles(key)
 		return record
 	} else {
@@ -68,7 +68,25 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 }
 
 func writeToSingleFile(listOfRecords []types.Record) {
-
+	var FILENAME = engine.GetTableName()
+	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	var filter = bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
+	for _, record := range listOfRecords {
+		filter.Add([]byte(record.Key))
+	}
+	var filterLength = uint64(len(filter.Serialize()))
+	var summary = CreateSummary(listOfRecords, filterLength)
+	var summaryLength = uint64(len(summary.Serialize()))
+	var indexes = CreateIndexes(listOfRecords, filterLength+summaryLength)
+	var data = convertRecordsToBytes(listOfRecords)
+	file.Write(data)
+	file.Write(indexes.Serialize())
+	file.Write(summary.Serialize())
+	file.Write(filter.Serialize())
+	file.Close()
 }
 
 func convertRecordsToBytes(listOfRecords []types.Record) []byte {
@@ -112,6 +130,9 @@ func readFromMultipleFiles(key string) *types.Record {
 }
 
 func readFromSingleFile(key string) *types.Record {
+	var possibleFiles = CheckBloomFilter(key)
+
+	fmt.Println(possibleFiles)
 	return nil
 }
 

@@ -25,7 +25,7 @@ func CreateSummary(listOfRecords []types.Record, initialOffset uint64) Summary {
 	var indexes = CreateIndexes(listOfRecords, initialOffset)
 	fmt.Println(indexes)
 	var summaryIndexes = make([]Index, 0)
-	var indexOffset uint64 = 0
+	var indexOffset uint64 = initialOffset
 	for i := 0; i < len(indexes); i++ {
 		if i%2 == 0 { // TODO: change 2 to something from config file (2 is block size of index summary)
 			var temp = Index{
