@@ -1,0 +1,12 @@
+structure: multiple-files # "multiple-files", "single-file"
+bloom_filter:
+  precision: 0.01
+cache:
+  size: 10
+skip_list:
+  max_level: 7
+lsm:
+  max_level: 5
+token_bucket:
+  size: 10
+  rate: 1000
