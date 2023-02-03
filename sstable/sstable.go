@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
@@ -35,29 +34,31 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	indexes := CreateIndexes(listOfRecords, 0)
 	summary := CreateSummary(listOfRecords, 0)
 	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), engine.DEFAULT_FILTER_PRECISION)
+	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
+
 	for _, record := range listOfRecords {
 		filter.Add([]byte(record.Key))
 	}
-	file, err := os.OpenFile(engine.GetNextTableFilePath(), os.O_WRONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 	file.Write(data)
 
-	file, err = os.OpenFile(engine.GetNextIndexFilePath(), os.O_WRONLY|os.O_CREATE, 0666)
+	file, err = os.OpenFile(engine.GetIndexPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 	file.Write(indexes.Serialize())
 
-	file, err = os.OpenFile(engine.GetNextSummaryFilePath(), os.O_WRONLY|os.O_CREATE, 0666)
+	file, err = os.OpenFile(engine.GetSummaryPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(summary)
 	file.Write(summary.Serialize())
 
-	file, err = os.OpenFile(engine.GetNextBloomFilterPath(), os.O_WRONLY|os.O_CREATE, 0666)
+	file, err = os.OpenFile(engine.GetBloomFilterPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -85,20 +86,17 @@ func readFromMultipleFiles(key string) *types.Record {
 	var possibleIndexesOffsets = checkSummary(key, possibleFiles)
 	var returnRecord *types.Record = nil
 	var possibleIndexes = make([]Index, 0)
-	fmt.Println(possibleIndexesOffsets)
 	for i, offset := range possibleIndexesOffsets {
 		fmt.Println(i, offset)
-		var file, err = os.OpenFile(filepath.Join(engine.GetIndexFilePath(), possibleFiles[i]), os.O_RDONLY, 0666)
+		var file, err = os.OpenFile(engine.GetIndexPath(possibleFiles[i]), os.O_RDONLY, 0666)
 		if err != nil {
 			panic(err)
 		}
-		var index = ReadIndex(file, offset.Offset, key)
-		fmt.Println(index)
+		var index = readIndex(file, offset.Offset, key)
 		possibleIndexes = append(possibleIndexes, index)
 	}
-	fmt.Println(possibleIndexes)
 	for i, index := range possibleIndexes {
-		var file, err = os.OpenFile(filepath.Join(engine.GetSSTablePath(), possibleFiles[i]), os.O_RDONLY, 0666)
+		var file, err = os.OpenFile(engine.GetSSTablePath(possibleFiles[i]), os.O_RDONLY, 0666)
 		if err != nil {
 			panic(err)
 		}
@@ -117,14 +115,13 @@ func readFromSingleFile(key string) *types.Record {
 }
 
 func CheckBloomFilter(key string) []string {
-	files, err := os.ReadDir(engine.GetBloomFilterPath())
+	files, err := os.ReadDir(engine.GetBloomDir())
 	if err != nil {
 		panic(err)
 	}
 	var possibleFiles = make([]string, 0)
 	for _, file := range files {
-		var path = filepath.Join(engine.GetBloomFilterPath(), file.Name())
-		var filterBytes, err = ioutil.ReadFile(path)
+		var filterBytes, err = ioutil.ReadFile(engine.GetBloomFilterPath(file.Name()))
 		if err != nil {
 			panic(err)
 		}

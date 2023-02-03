@@ -22,6 +22,7 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 			key := getKey()
 			var record = HandleGet(key, memtable, LRU)
 			fmt.Println(record)
+			fmt.Println(string(record.Value))
 		case "3":
 			key := getKey()
 			HandleDelete(key, memtable)

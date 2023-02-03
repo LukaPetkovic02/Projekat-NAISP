@@ -67,7 +67,9 @@ func DeserializeIndexes(serializedIndexes []byte) Indexes {
 	return indexes
 }
 
-func ReadIndex(file *os.File, offset uint64, key string) Index {
+// HELPER FUNCTIONS
+
+func readIndex(file *os.File, offset uint64, key string) Index {
 	var index Index
 
 	file.Seek(int64(offset), 0)

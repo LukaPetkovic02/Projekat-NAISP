@@ -15,6 +15,7 @@ func main() {
 	sl.InitSP(10, 10, 100)
 	var memtable = memtable.Init(100, sl)
 	App.TUI(memtable, LRU)
+	// var time = time.Now().UnixNano()
+	// fmt.Println("1_" + strconv.FormatInt(time, 10))
 
-	// fmt.Println(engine.GetSSTableFilePath())
 }
