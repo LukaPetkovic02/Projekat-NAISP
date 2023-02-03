@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 )
 
@@ -32,5 +33,9 @@ func LeveledCompaction(current_level int) {
 		//CreateForNextLevel(ss3, current_level)
 		//Delete(currentLevelFiles[i-1])
 		//Delete(currentLevelFiles[i])
+	}
+
+	if current_level != config.Values.Segment_size {
+
 	}
 }

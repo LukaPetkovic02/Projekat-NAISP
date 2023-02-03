@@ -3,6 +3,7 @@ package sstable
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
@@ -163,6 +164,40 @@ func convertRecordsToBytes(listOfRecords []types.Record) []byte {
 		bytes = append(bytes, record.Serialize()...)
 	}
 	return bytes
+}
+
+func Delete(filename string) {
+	if config.Values.Structure == "multiple-files" {
+		deleteMultipleFiles(filename)
+	} else {
+		deleteSingleFiles(filename)
+	}
+}
+
+func deleteMultipleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetIndexPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetSummaryPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetBloomFilterPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+}
+
+func deleteSingleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
 }
 
 // TODO: Make function for reading from sstable

@@ -11,8 +11,6 @@ import (
 	"github.com/edsrzf/mmap-go"
 )
 
-var segment_size int = 3
-
 func Append(record types.Record) bool {
 	// TODO: Open the file as memory mapped
 	file, err := os.OpenFile(engine.GetCurrentWalFilePath(), os.O_RDWR|os.O_CREATE, 0777)
