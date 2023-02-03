@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -69,6 +70,18 @@ func GetMetaDataFilePath() string {
 // SSTable
 func GetTableName() string {
 	return "1_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".bin"
+}
+
+// za trenutni nivo racuna ime fajla u narednom nivou
+func GetTableNexLevelName(current_level int) string {
+	return strconv.FormatInt(int64(current_level+1), 10) + "_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".bin"
+}
+
+// za trenutno ime fajla racuna trenutni nivo ne znam da li ce mi trebati
+func GetCurrentLevel(filename string) int {
+	split := strings.Split(filename, ",")
+	ret, _ := strconv.Atoi(split[0])
+	return ret
 }
 
 func GetSSTablePath(filename string) string {
