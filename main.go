@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/App"
-	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
@@ -12,8 +9,6 @@ import (
 )
 
 func main() {
-	var config = config.Get()
-	fmt.Println(config)
 	engine.CreateDataFolderStructure()
 	var sl = &skipList.SkipList{}
 	var LRU = lru.NewLRU(10)

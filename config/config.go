@@ -1,7 +1,7 @@
 package config
 
-func Get() *Config {
-	var config = load()
+func load() *Config {
+	var config = loadExternal()
 	if config != nil {
 		return config
 	} else {
@@ -23,8 +23,13 @@ func Get() *Config {
 				Size: 10,
 				Rate: 1000,
 			},
+			Memtable: Memtable{
+				Size:      120,
+				Threshold: 10,
+				Use:       "skip-list",
+			},
 		}
-
 	}
-
 }
+
+var Values *Config = load()

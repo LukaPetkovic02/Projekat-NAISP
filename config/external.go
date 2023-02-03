@@ -14,6 +14,7 @@ type Config struct {
 	SkipList    SkipList    `yaml:"skipList"`
 	Lsm         Lsm         `yaml:"lsm"`
 	TokenBucket TokenBucket `yaml:"tokenBucket"`
+	Memtable    Memtable    `yaml:"memtable"`
 }
 type BloomFilter struct {
 	Precision float64 `yaml:"precision"`
@@ -32,7 +33,13 @@ type TokenBucket struct {
 	Rate uint64 `yaml:"rate"`
 }
 
-func load() *Config {
+type Memtable struct {
+	Size      uint   `yaml:"size"`
+	Threshold uint64 `yaml:"threshold"`
+	Use       string `yaml:"use"`
+}
+
+func loadExternal() *Config {
 	var c *Config = nil
 	yamlFile, err := ioutil.ReadFile("config.yaml")
 	if err != nil {

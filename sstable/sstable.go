@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
@@ -33,7 +34,7 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	data := convertRecordsToBytes(listOfRecords)
 	indexes := CreateIndexes(listOfRecords, 0)
 	summary := CreateSummary(listOfRecords, 0)
-	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), engine.DEFAULT_FILTER_PRECISION)
+	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
 	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
 
 	for _, record := range listOfRecords {
