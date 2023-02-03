@@ -67,6 +67,10 @@ func GetMetaDataFilePath() string {
 	return filepath.Join(GetDataDir(), "meta", "Metadata.txt")
 }
 
+func GetTableDir() string {
+	return filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir)
+}
+
 // SSTable
 func GetTableName() string {
 	return "1_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".bin"

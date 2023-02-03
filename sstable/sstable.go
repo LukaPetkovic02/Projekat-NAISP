@@ -20,6 +20,74 @@ func Create(listOfRecords []types.Record) {
 		writeToSingleFile(listOfRecords)
 	}
 }
+
+func CreateForLevel(listOfRecords []types.Record, level int) {
+	if config.Values.Structure == "multiple-files" {
+		writeToMultipleFilesForLevel(listOfRecords, level)
+	} else {
+		writeToSingleFileForLevel(listOfRecords, level)
+	}
+}
+
+func writeToMultipleFilesForLevel(listOfRecords []types.Record, level int) {
+	data := convertRecordsToBytes(listOfRecords)
+	indexes := CreateIndexes(listOfRecords, 0)
+	summary := CreateSummary(listOfRecords, 0)
+	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
+	var FILENAME = engine.GetTableNexLevelName(level) //sets same name for all files, different directories
+
+	for _, record := range listOfRecords {
+		filter.Add([]byte(record.Key))
+	}
+	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	file.Write(data)
+
+	file, err = os.OpenFile(engine.GetIndexPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	file.Write(indexes.Serialize())
+
+	file, err = os.OpenFile(engine.GetSummaryPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(summary)
+	file.Write(summary.Serialize())
+
+	file, err = os.OpenFile(engine.GetBloomFilterPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	file.Write(filter.Serialize())
+	file.Close()
+}
+
+func writeToSingleFileForLevel(listOfRecords []types.Record, level int) {
+	var FILENAME = engine.GetTableNexLevelName(level)
+	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
+	var filter = bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
+	for _, record := range listOfRecords {
+		filter.Add([]byte(record.Key))
+	}
+	var filterLength = uint64(len(filter.Serialize()))
+	var summary = CreateSummary(listOfRecords, filterLength)
+	var summaryLength = uint64(len(summary.Serialize()))
+	var indexes = CreateIndexes(listOfRecords, filterLength+summaryLength)
+	var data = convertRecordsToBytes(listOfRecords)
+	file.Write(data)
+	file.Write(indexes.Serialize())
+	file.Write(summary.Serialize())
+	file.Write(filter.Serialize())
+	file.Close()
+}
+
 func Read(key string) *types.Record {
 	if config.Values.Structure == "multiple-files" {
 		var record = readFromMultipleFiles(key)
