@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	rec "github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 type MerkleRoot struct {
@@ -31,12 +32,12 @@ func Hash(Data []byte) [20]byte {
 	return sha1.Sum(Data)
 }
 
-func Leafs(leaf []string) []*Node {
+func Leafs(leaf []rec.Record) []*Node {
 
 	var leafNodes []*Node
 
-	for _, keys := range leaf {
-		var hes = Hash([]byte(keys))
+	for _, record := range leaf {
+		var hes = Hash(record.Serialize())
 		leafNodes = append(leafNodes, &Node{
 			Data:  hes[:],
 			Left:  nil,
