@@ -8,13 +8,14 @@ import (
 )
 
 type Config struct {
-	Structure   string      `yaml:"structure"`
-	BloomFilter BloomFilter `yaml:"bloomFilter"`
-	Cache       Cache       `yaml:"cache"`
-	SkipList    SkipList    `yaml:"skipList"`
-	Lsm         Lsm         `yaml:"lsm"`
-	TokenBucket TokenBucket `yaml:"tokenBucket"`
-	Memtable    Memtable    `yaml:"memtable"`
+	Segment_size int         `yaml:"segment_size"`
+	Structure    string      `yaml:"structure"`
+	BloomFilter  BloomFilter `yaml:"bloomFilter"`
+	Cache        Cache       `yaml:"cache"`
+	SkipList     SkipList    `yaml:"skipList"`
+	Lsm          Lsm         `yaml:"lsm"`
+	TokenBucket  TokenBucket `yaml:"tokenBucket"`
+	Memtable     Memtable    `yaml:"memtable"`
 }
 type BloomFilter struct {
 	Precision float64 `yaml:"precision"`

@@ -6,7 +6,8 @@ func load() *Config {
 		return config
 	} else {
 		return &Config{
-			Structure: "multiple-files",
+			Segment_size: 3,
+			Structure:    "multiple-files",
 			BloomFilter: BloomFilter{
 				Precision: 0.01,
 			},

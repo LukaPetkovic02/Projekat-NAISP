@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 	"github.com/edsrzf/mmap-go"
@@ -19,7 +20,7 @@ func Append(record types.Record) bool {
 		panic(err)
 	}
 	current_data := ReadWalSegment(*file)
-	if len(current_data) == segment_size {
+	if len(current_data) == config.Values.Segment_size {
 		file.Close()
 		file, err = os.OpenFile(engine.GetNextWalFilePath(), os.O_RDWR|os.O_CREATE, 0777)
 		if err != nil {
@@ -62,7 +63,7 @@ func ReadWalSegment(file os.File) []types.Record {
 	var ret []types.Record
 	var current_position int64 = 0
 
-	for i := 0; current_position < (int64)(len(log)) && i < segment_size; i++ {
+	for i := 0; current_position < (int64)(len(log)) && i < config.Values.Segment_size; i++ {
 		ret = append(ret, types.DeserializeRecord(log[current_position:]))
 		current_position += int64(len(ret[len(ret)-1].Serialize()))
 	}
