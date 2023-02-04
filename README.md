@@ -31,10 +31,10 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### SSTable
 
-- [ ] Make function that returns bytes for sstable
-- [ ] Make function that returns bytes for index summary
-- [ ] Make function that returns bytes for index
-- [ ] Make function that creates one or more files based on config using above functions
+- [X] Make function that returns bytes for sstable
+- [X] Make function that returns bytes for index summary
+- [X] Make function that returns bytes for index
+- [X] Make function that creates one or more files based on config using above functions
   
 #### Naming of ssTable
 
