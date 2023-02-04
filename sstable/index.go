@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
@@ -16,9 +17,19 @@ type Index struct {
 
 type Indexes []Index
 
-func CreateIndexes(records []types.Record, startOffset uint64) Indexes {
-	var indexes []Index = make([]Index, len(records))
-	var offset uint64 = startOffset
+func CreateIndexes(records []types.Record, initialOffset uint64) Indexes {
+	var indexes Indexes = make([]Index, len(records))
+	var offset uint64 = initialOffset
+	if config.Values.Structure == "single-file" {
+		for i := 0; i < len(records); i++ {
+			temp := Index{
+				KeySize: uint64(len(records[i].Key)),
+				Key:     records[i].Key,
+				Offset:  offset,
+			}
+			offset += uint64(len(temp.Serialize()))
+		}
+	}
 	for i, record := range records {
 		indexes[i].Key = record.Key
 		indexes[i].KeySize = record.KeySize
@@ -71,16 +82,25 @@ func DeserializeIndexes(serializedIndexes []byte) Indexes {
 
 func readIndex(file *os.File, offset uint64, key string) Index {
 	var index Index
-
 	file.Seek(int64(offset), 0)
+	// tell, _ = file.Seek(0, os.SEEK_CUR)
+	// fmt.Println(tell)
+	// return index
 	for {
-		binary.Read(file, binary.LittleEndian, &index.KeySize)
-		var b = make([]byte, index.KeySize)
+		var b = make([]byte, 8)
+		file.Read(b)
+		index.KeySize = binary.LittleEndian.Uint64(b)
+		b = make([]byte, index.KeySize)
 		file.Read(b)
 		index.Key = string(b)
-		binary.Read(file, binary.LittleEndian, &index.Offset)
+		b = make([]byte, 8)
+		file.Read(b)
+		index.Offset = binary.LittleEndian.Uint64(b)
 		if index.Key == key {
 			return index
+		}
+		if index.Key > key {
+			return Index{}
 		}
 	}
 }

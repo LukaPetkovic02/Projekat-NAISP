@@ -105,3 +105,7 @@ func GetSummaryPath(filename string) string {
 func GetBloomDir() string {
 	return filepath.Join(DefaultDataPath, DefaultDataDir, DEFAULT_BLOOM_FILTER_DIR)
 }
+
+func GetTableDir() string {
+	return filepath.Join(DefaultDataPath, DefaultDataDir, DefaultSSTableDir)
+}

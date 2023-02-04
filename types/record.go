@@ -112,3 +112,11 @@ func ReadRecord(file *os.File) Record {
 	record.Value = b
 	return record
 }
+
+func ConvertRecordsToBytes(listOfRecords []Record) []byte {
+	var bytes []byte
+	for _, record := range listOfRecords {
+		bytes = append(bytes, record.Serialize()...)
+	}
+	return bytes
+}

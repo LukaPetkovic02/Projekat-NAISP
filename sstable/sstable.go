@@ -2,7 +2,6 @@ package sstable
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
@@ -11,8 +10,6 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
-// TODO: Get config from config file and check if single or multiple files are to be written
-// TODO: Add default config in engine->constants.go
 func Create(listOfRecords []types.Record) {
 	if config.Values.Structure == "multiple-files" {
 		writeToMultipleFiles(listOfRecords)
@@ -20,6 +17,7 @@ func Create(listOfRecords []types.Record) {
 		writeToSingleFile(listOfRecords)
 	}
 }
+
 func Read(key string) *types.Record {
 	if config.Values.Structure == "multiple-files" {
 		var record = readFromMultipleFiles(key)
@@ -30,16 +28,92 @@ func Read(key string) *types.Record {
 	}
 }
 
-func writeToMultipleFiles(listOfRecords []types.Record) {
-	data := convertRecordsToBytes(listOfRecords)
-	indexes := CreateIndexes(listOfRecords, 0)
-	summary := CreateSummary(listOfRecords, 0)
-	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
-	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
+func ReadAllRecordsFromTable(filename string) {
+	if config.Values.Structure == "single-file" {
+		// skip bloom filter, summary and index
+	}
+	// read record by record from file till EOF
+}
 
+func readFromMultipleFiles(key string) *types.Record {
+	var items, err = os.ReadDir(engine.GetBloomDir())
+	if err != nil {
+		panic(err)
+	}
+	for _, item := range items {
+		if item.IsDir() {
+			continue
+		}
+		var file, err = os.Open(engine.GetBloomFilterPath(item.Name()))
+		if err != nil {
+			panic(err)
+		}
+		var filter = bloomFilter.ReadFromFile(file)
+		if filter.Get([]byte(key)) {
+			file, err = os.Open(engine.GetSummaryPath(item.Name()))
+			if err != nil {
+				panic(err)
+			}
+			var summary = isKeyInSummaryFile(key, file)
+			if !summary {
+				continue
+			}
+			var closestRecord = getClosestRecord(key, file)
+			file, err = os.Open(engine.GetIndexPath(item.Name()))
+			if err != nil {
+				panic(err)
+			}
+			var index = readIndex(file, closestRecord.Offset, key)
+			file, err = os.Open(engine.GetSSTablePath(item.Name()))
+			if err != nil {
+				panic(err)
+			}
+			file.Seek(int64(index.Offset), 0)
+			var record = types.ReadRecord(file)
+			return &record
+		}
+	}
+	return nil
+}
+func readFromSingleFile(key string) *types.Record {
+	var items, err = os.ReadDir(engine.GetTableDir())
+	if err != nil {
+		panic(err)
+	}
+	for _, item := range items {
+		if item.IsDir() {
+			continue
+		}
+		var file, err = os.Open(engine.GetSSTablePath(item.Name()))
+		if err != nil {
+			panic(err)
+		}
+		var filter = bloomFilter.ReadFromFile(file)
+		if filter.Get([]byte(key)) {
+			var summary = isKeyInSummaryFile(key, file)
+			if !summary {
+				continue
+			}
+			var closestRecord = getClosestRecord(key, file)
+			fmt.Println("Closest: ", closestRecord)
+			var index = readIndex(file, closestRecord.Offset, key)
+			fmt.Println("Index iz ss: ", index)
+			file.Seek(int64(index.Offset), 0)
+			var record = types.ReadRecord(file)
+			return &record
+		}
+	}
+	return nil
+}
+func writeToMultipleFiles(listOfRecords []types.Record) {
+	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
+	summary := CreateSummary(listOfRecords, 0)
+	indexes := CreateIndexes(listOfRecords, 0)
+	data := types.ConvertRecordsToBytes(listOfRecords)
 	for _, record := range listOfRecords {
 		filter.Add([]byte(record.Key))
 	}
+	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
 	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -65,8 +139,8 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	}
 	file.Write(filter.Serialize())
 	file.Close()
-}
 
+}
 func writeToSingleFile(listOfRecords []types.Record) {
 	var FILENAME = engine.GetTableName()
 	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
@@ -81,77 +155,10 @@ func writeToSingleFile(listOfRecords []types.Record) {
 	var summary = CreateSummary(listOfRecords, filterLength)
 	var summaryLength = uint64(len(summary.Serialize()))
 	var indexes = CreateIndexes(listOfRecords, filterLength+summaryLength)
-	var data = convertRecordsToBytes(listOfRecords)
-	file.Write(data)
-	file.Write(indexes.Serialize())
-	file.Write(summary.Serialize())
+	var data = types.ConvertRecordsToBytes(listOfRecords)
 	file.Write(filter.Serialize())
+	file.Write(summary.Serialize())
+	file.Write(indexes.Serialize())
+	file.Write(data)
 	file.Close()
-}
-
-func convertRecordsToBytes(listOfRecords []types.Record) []byte {
-	var bytes []byte
-	for _, record := range listOfRecords {
-		bytes = append(bytes, record.Serialize()...)
-	}
-	return bytes
-}
-
-// TODO: Make function for reading from sstable
-// TODO: Load only part of summary file into memory
-
-func readFromMultipleFiles(key string) *types.Record {
-	var possibleFiles = CheckBloomFilter(key)
-	var possibleIndexesOffsets = checkSummary(key, possibleFiles)
-	var returnRecord *types.Record = nil
-	var possibleIndexes = make([]Index, 0)
-	for i, offset := range possibleIndexesOffsets {
-		fmt.Println(i, offset)
-		var file, err = os.OpenFile(engine.GetIndexPath(possibleFiles[i]), os.O_RDONLY, 0666)
-		if err != nil {
-			panic(err)
-		}
-		var index = readIndex(file, offset.Offset, key)
-		possibleIndexes = append(possibleIndexes, index)
-	}
-	for i, index := range possibleIndexes {
-		var file, err = os.OpenFile(engine.GetSSTablePath(possibleFiles[i]), os.O_RDONLY, 0666)
-		if err != nil {
-			panic(err)
-		}
-		file.Seek(int64(index.Offset), 0)
-		var record = types.ReadRecord(file)
-		if record.Key == key && (returnRecord == nil || record.Timestamp > returnRecord.Timestamp) {
-			returnRecord = &record
-		}
-	}
-
-	return returnRecord
-}
-
-func readFromSingleFile(key string) *types.Record {
-	var possibleFiles = CheckBloomFilter(key)
-
-	fmt.Println(possibleFiles)
-	return nil
-}
-
-func CheckBloomFilter(key string) []string {
-	files, err := os.ReadDir(engine.GetBloomDir())
-	if err != nil {
-		panic(err)
-	}
-	var possibleFiles = make([]string, 0)
-	for _, file := range files {
-		var filterBytes, err = ioutil.ReadFile(engine.GetBloomFilterPath(file.Name()))
-		if err != nil {
-			panic(err)
-		}
-		var filter = bloomFilter.Deserialize(filterBytes)
-		var actualFilter = bloomFilter.RecreateBloomFilterBloomFilter(filter.M, filter.K, filter.Fns, filter.Podaci)
-		if actualFilter.Get([]byte(key)) {
-			possibleFiles = append(possibleFiles, file.Name())
-		}
-	}
-	return possibleFiles
 }

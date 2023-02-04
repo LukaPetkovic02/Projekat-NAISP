@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
+	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/utils"
 )
@@ -132,5 +133,32 @@ func Deserialize(data []byte) *BloomFilter {
 	bloom.Podaci = data[podaci_start : podaci_start+int(bloom.M)]
 	// fmt.Println(bloom.Podaci)
 
+	return bloom
+}
+
+func ReadFromFile(file *os.File) *BloomFilter {
+	var bloom = new(BloomFilter)
+	var m uint64
+	var k uint64
+	var b = make([]byte, M_SIZE)
+	file.Read(b)
+	m = binary.LittleEndian.Uint64(b)
+	bloom.M = uint(m)
+	bloom.M = uint(m)
+	b = make([]byte, K_SIZE)
+	file.Read(b)
+	k = binary.LittleEndian.Uint64(b)
+	bloom.K = uint(k)
+	bloom.Fns = make([]utils.HashWithSeed, bloom.K)
+	for i := 0; i < int(bloom.K); i++ {
+		b = make([]byte, HASH_SIZE)
+		file.Read(b)
+		bloom.Fns[i].Seed = b
+	}
+	bloom.Podaci = make([]byte, bloom.M)
+	var buf = &bytes.Buffer{}
+	bloom.Encoder = gob.NewEncoder(buf)
+	bloom.Decoder = gob.NewDecoder(buf)
+	file.Read(bloom.Podaci)
 	return bloom
 }
