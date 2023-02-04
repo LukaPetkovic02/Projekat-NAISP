@@ -11,7 +11,7 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 )
 
-func LeveledCompaction(current_level int) {
+func SizeTierCompaction(current_level int) {
 	files, err := ioutil.ReadDir(engine.GetTableDir())
 	if err != nil {
 		log.Fatal(err)
@@ -36,6 +36,6 @@ func LeveledCompaction(current_level int) {
 	}
 
 	if current_level+1 != int(config.Values.Lsm.MaxLevel) {
-		LeveledCompaction(current_level + 1)
+		SizeTierCompaction(current_level + 1)
 	}
 }
