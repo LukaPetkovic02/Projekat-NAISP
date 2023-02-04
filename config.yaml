@@ -1,4 +1,4 @@
-structure: single-file # "multiple-files", "single-file"
+structure: multiple-files # "multiple-files", "single-file"
 bloomFilter:
   precision: 0.01
 cache:
@@ -15,4 +15,4 @@ memtable:
   size: 120
   use: skip-list #skip-list, b-tree
 summary:
-  blockSize: 5
+  blockSize: 2

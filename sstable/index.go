@@ -80,12 +80,9 @@ func DeserializeIndexes(serializedIndexes []byte) Indexes {
 
 // HELPER FUNCTIONS
 
-func readIndex(file *os.File, offset uint64, key string) Index {
+func readIndex(file *os.File, offset uint64, key string) *Index {
 	var index Index
 	file.Seek(int64(offset), 0)
-	// tell, _ = file.Seek(0, os.SEEK_CUR)
-	// fmt.Println(tell)
-	// return index
 	for {
 		var b = make([]byte, 8)
 		file.Read(b)
@@ -97,10 +94,10 @@ func readIndex(file *os.File, offset uint64, key string) Index {
 		file.Read(b)
 		index.Offset = binary.LittleEndian.Uint64(b)
 		if index.Key == key {
-			return index
+			return &index
 		}
 		if index.Key > key {
-			return Index{}
+			return nil
 		}
 	}
 }

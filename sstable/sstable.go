@@ -99,6 +99,9 @@ func readFromSingleFile(key string) *types.Record {
 			var closestRecord = getClosestRecord(key, file)
 			fmt.Println("Closest: ", closestRecord)
 			var index = readIndex(file, closestRecord.Offset, key)
+			if index == nil {
+				panic("Index is nil")
+			}
 			fmt.Println("Index iz ss: ", index)
 			file.Seek(int64(index.Offset), 0)
 			var record = types.ReadRecord(file)
@@ -154,6 +157,7 @@ func writeToSingleFile(listOfRecords []types.Record) {
 	}
 	var filterLength = uint64(len(filter.Serialize()))
 	var summary = CreateSummary(listOfRecords, filterLength)
+	fmt.Println("Summary: ", summary)
 	var summaryLength = uint64(len(summary.Serialize()))
 	var indexes = CreateIndexes(listOfRecords, filterLength+summaryLength)
 	var data = types.ConvertRecordsToBytes(listOfRecords)

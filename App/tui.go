@@ -21,6 +21,10 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 		case "2":
 			key := getKey()
 			var record = HandleGet(key, memtable, LRU)
+			if record == nil {
+				fmt.Println("Record doesn't exist")
+				break
+			}
 			fmt.Println(record)
 			fmt.Println(string(record.Value))
 		case "3":
