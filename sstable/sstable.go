@@ -2,6 +2,7 @@ package sstable
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
@@ -10,11 +11,11 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
-func Create(listOfRecords []types.Record) {
+func Create(listOfRecords []types.Record, level int) {
 	if config.Values.Structure == "multiple-files" {
-		writeToMultipleFiles(listOfRecords)
+		writeToMultipleFiles(listOfRecords, level)
 	} else {
-		writeToSingleFile(listOfRecords)
+		writeToSingleFile(listOfRecords, level)
 	}
 }
 
@@ -77,6 +78,7 @@ func readFromMultipleFiles(key string) *types.Record {
 	}
 	return nil
 }
+
 func readFromSingleFile(key string) *types.Record {
 	var items, err = os.ReadDir(engine.GetTableDir())
 	if err != nil {
@@ -110,7 +112,8 @@ func readFromSingleFile(key string) *types.Record {
 	}
 	return nil
 }
-func writeToMultipleFiles(listOfRecords []types.Record) {
+
+func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
 	summary := CreateSummary(listOfRecords, 0)
 	indexes := CreateIndexes(listOfRecords, 0)
@@ -118,7 +121,7 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	for _, record := range listOfRecords {
 		filter.Add([]byte(record.Key))
 	}
-	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
+	var FILENAME = engine.GetTableName(level) //sets same name for all files, different directories
 	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -145,8 +148,9 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	file.Close()
 
 }
-func writeToSingleFile(listOfRecords []types.Record) {
-	var FILENAME = engine.GetTableName()
+
+func writeToSingleFile(listOfRecords []types.Record, level int) {
+	var FILENAME = engine.GetTableName(level)
 	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -166,4 +170,38 @@ func writeToSingleFile(listOfRecords []types.Record) {
 	file.Write(indexes.Serialize())
 	file.Write(data)
 	file.Close()
+}
+
+func Delete(filename string) {
+	if config.Values.Structure == "multiple-files" {
+		deleteMultipleFiles(filename)
+	} else {
+		deleteSingleFiles(filename)
+	}
+}
+
+func deleteMultipleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetIndexPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetSummaryPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetBloomFilterPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+}
+
+func deleteSingleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
 }
