@@ -17,4 +17,10 @@ func main() {
 	var memtable = memtable.Init(100, sl)
 	App.TUI(memtable, LRU)
 
+	//fmt.Println(cms.Deserialize(bajtovi).Encoder)
+	//fmt.Println(cms.Deserialize(bajtovi).M)
+	//fmt.Println(cms.Deserialize(bajtovi).Data)
+	//fmt.Println(cms.Deserialize(bajtovi).Frequency([]byte("nesto")))
+	//fmt.Println(cms.Deserialize(bajtovi).Frequency([]byte("nesto123")))
+	//fmt.Println(cms.Deserialize(bajtovi).Frequency([]byte("nesto55")))
 }

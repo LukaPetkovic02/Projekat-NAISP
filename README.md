@@ -21,13 +21,13 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### LRU
 
-- [ ] Create LRU cache
-- [ ] Create Add and Get methods in LRU cache
+- [+] Create LRU cache
+- [+] Create Add and Get methods in LRU cache
   
 ### Merkle Tree
 
-- [ ] Implement functions for merkle tree
-- [ ] Implement functions for writing Metadata.txt
+- [+] Implement functions for merkle tree
+- [+] Implement functions for writing Metadata.txt
 
 ### SSTable
 
@@ -56,17 +56,17 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### WAL
 
-- [ ] Create function for reading wal file
-- [ ] Opening file should as memory mapped file
+- [+] Create function for reading wal file
+- [+] Opening file should as memory mapped file
 
 ### bTree
 
-- [ ] Implement bTree
-- [ ] Make bTree implement memtable interface
+- [+] Implement bTree
+- [+] Make bTree implement memtable interface
 
 ### skipList
 
-- [ ] Add missing functions to skipList to implement memtable interface
+- [+] Add missing functions to skipList to implement memtable interface
 
 ### LSM
 
@@ -85,8 +85,8 @@ There are some Todo left in code that shows where things are meant to be impleme
 
 ### Other
 
-- [ ] Make function for deserializing Record (in types->record.go) (need this for wal read)
-- [ ] Change how wal file is created
+- [+] Make function for deserializing Record (in types->record.go) (need this for wal read)
+- [+] Change how wal file is created
 
 ### Note
 

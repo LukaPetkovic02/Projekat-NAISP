@@ -120,3 +120,16 @@ func ConvertRecordsToBytes(listOfRecords []Record) []byte {
 	}
 	return bytes
 }
+
+// Ucitava niz rekorda iz niza bajtova, pogdno za sstable i druge strukture
+func ReadRecords(data []byte) []Record {
+	var ret []Record
+	var current_position = 0
+
+	for i := 0; current_position < len(data); i++ {
+		ret = append(ret, DeserializeRecord(data[current_position:]))
+		current_position += len(ret[len(ret)-1].Serialize())
+	}
+
+	return ret
+}
