@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	WalSegment  int         `yaml:"walSegment"`
 	Structure   string      `yaml:"structure"`
 	BloomFilter BloomFilter `yaml:"bloomFilter"`
 	Cache       Cache       `yaml:"cache"`
