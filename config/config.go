@@ -28,6 +28,9 @@ func load() *Config {
 				Threshold: 10,
 				Use:       "skip-list",
 			},
+			Summary: Summary{
+				BlockSize: 5,
+			},
 		}
 	}
 }

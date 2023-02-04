@@ -32,7 +32,7 @@ func CreateSummary(listOfRecords []types.Record, initialOffset uint64) Summary {
 	}
 	var indexOffset uint64 = initialOffset + additionalOffset
 	for i := 0; i < len(indexes); i++ {
-		if i%2 == 0 { // TODO: change 2 to something from config file (2 is block size of index summary)
+		if i%config.Values.Summary.BlockSize == 0 {
 			var temp = Index{
 				KeySize: indexes[i].KeySize,
 				Key:     indexes[i].Key,

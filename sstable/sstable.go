@@ -28,11 +28,13 @@ func Read(key string) *types.Record {
 	}
 }
 
-func ReadAllRecordsFromTable(filename string) {
+func ReadAllRecordsFromTable(filename string) []types.Record {
+	var result []types.Record
 	if config.Values.Structure == "single-file" {
 		// skip bloom filter, summary and index
 	}
 	// read record by record from file till EOF
+	return result
 }
 
 func readFromMultipleFiles(key string) *types.Record {
@@ -130,7 +132,6 @@ func writeToMultipleFiles(listOfRecords []types.Record) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(summary)
 	file.Write(summary.Serialize())
 
 	file, err = os.OpenFile(engine.GetBloomFilterPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)

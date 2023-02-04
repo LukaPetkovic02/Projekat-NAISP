@@ -15,6 +15,7 @@ type Config struct {
 	Lsm         Lsm         `yaml:"lsm"`
 	TokenBucket TokenBucket `yaml:"tokenBucket"`
 	Memtable    Memtable    `yaml:"memtable"`
+	Summary     Summary     `yaml:"summary"`
 }
 type BloomFilter struct {
 	Precision float64 `yaml:"precision"`
@@ -37,6 +38,10 @@ type Memtable struct {
 	Size      uint   `yaml:"size"`
 	Threshold uint64 `yaml:"threshold"`
 	Use       string `yaml:"use"`
+}
+
+type Summary struct {
+	BlockSize int `yaml:"blockSize"`
 }
 
 func loadExternal() *Config {

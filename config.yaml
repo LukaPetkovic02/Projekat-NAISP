@@ -14,3 +14,5 @@ memtable:
   threshold: 50
   size: 120
   use: skip-list #skip-list, b-tree
+summary:
+  blockSize: 5
