@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"hash/crc32"
+	"os"
 	"time"
 )
 
@@ -93,4 +94,33 @@ func ReadRecords(data []byte) []Record {
 	}
 
 	return ret
+}
+func ReadRecord(file *os.File) Record {
+	var b = make([]byte, CRC_SIZE)
+	file.Read(b)
+	var record Record
+	record.CRC = binary.LittleEndian.Uint32(b)
+	b = make([]byte, TIMESTAMP_SIZE)
+	file.Read(b)
+	record.Timestamp = binary.LittleEndian.Uint64(b)
+	b = make([]byte, TOMBSTONE_SIZE)
+	file.Read(b)
+	if b[0] == 1 {
+		record.Tombstone = true
+	} else {
+		record.Tombstone = false
+	}
+	b = make([]byte, KEY_SIZE_SIZE)
+	file.Read(b)
+	record.KeySize = binary.LittleEndian.Uint64(b)
+	b = make([]byte, VALUE_SIZE_SIZE)
+	file.Read(b)
+	record.ValueSize = binary.LittleEndian.Uint64(b)
+	b = make([]byte, int(record.KeySize))
+	file.Read(b)
+	record.Key = string(b)
+	b = make([]byte, int(record.ValueSize))
+	file.Read(b)
+	record.Value = b
+	return record
 }
