@@ -96,7 +96,7 @@ func (s *SkipList) GetSortedRecordsList() []types.Record {
 	}
 	//treba isprazniti listu kada se ona popuni
 	s.InitSP(s.maxHeight, s.height, s.max_capacity)
-	return sortNodeovi
+	return sortNodeovi[1:]
 }
 
 func (s *SkipList) Add(podatak types.Record) bool {

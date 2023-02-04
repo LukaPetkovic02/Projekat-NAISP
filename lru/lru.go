@@ -33,14 +33,14 @@ func (lru *LRUCache) Add(rec types.Record) {
 
 }
 
-func (lru *LRUCache) Read(kljuc string) []byte {
+func (lru *LRUCache) Read(kljuc string) *types.Record {
 
 	el, in := lru.Hash_Map[kljuc]
 
 	if in {
 
 		lru.Recent.MoveToFront(el)
-		return el.Value.(types.Record).Value
+		return el.Value.(*types.Record)
 
 	} else {
 		return nil
@@ -48,8 +48,8 @@ func (lru *LRUCache) Read(kljuc string) []byte {
 
 }
 
-func NewLRU(s int) LRUCache {
+func NewLRU(s int) *LRUCache {
 
 	lru_cache := &LRUCache{LRU_Size: s, Recent: list.New(), Hash_Map: make(map[string]*list.Element)}
-	return *lru_cache
+	return lru_cache
 }

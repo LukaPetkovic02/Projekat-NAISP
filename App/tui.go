@@ -3,11 +3,12 @@ package App
 import (
 	"fmt"
 
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 )
 
 // TODO: Add Range Scan and Get List options
-func TUI(memtable *memtable.Memtable) {
+func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 	var isRunning = true
 	for isRunning {
 		printMenu()
@@ -16,10 +17,16 @@ func TUI(memtable *memtable.Memtable) {
 		switch option {
 		case "1":
 			key, value := getKeyValue()
-			HandleAdd(key, []byte(value), memtable)
+			HandleAdd(key, []byte(value), memtable, LRU)
 		case "2":
 			key := getKey()
-			HandleGet(key, memtable)
+			var record = HandleGet(key, memtable, LRU)
+			if record == nil {
+				fmt.Println("Record doesn't exist")
+				break
+			}
+			fmt.Println(record)
+			fmt.Println(string(record.Value))
 		case "3":
 			key := getKey()
 			HandleDelete(key, memtable)
