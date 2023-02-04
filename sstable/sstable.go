@@ -2,6 +2,7 @@ package sstable
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
@@ -77,6 +78,7 @@ func readFromMultipleFiles(key string) *types.Record {
 	}
 	return nil
 }
+
 func readFromSingleFile(key string) *types.Record {
 	var items, err = os.ReadDir(engine.GetTableDir())
 	if err != nil {
@@ -107,6 +109,7 @@ func readFromSingleFile(key string) *types.Record {
 	}
 	return nil
 }
+
 func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
 	summary := CreateSummary(listOfRecords, 0)
@@ -142,6 +145,7 @@ func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 	file.Close()
 
 }
+
 func writeToSingleFile(listOfRecords []types.Record, level int) {
 	var FILENAME = engine.GetTableName(level)
 	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
@@ -162,4 +166,38 @@ func writeToSingleFile(listOfRecords []types.Record, level int) {
 	file.Write(indexes.Serialize())
 	file.Write(data)
 	file.Close()
+}
+
+func Delete(filename string) {
+	if config.Values.Structure == "multiple-files" {
+		deleteMultipleFiles(filename)
+	} else {
+		deleteSingleFiles(filename)
+	}
+}
+
+func deleteMultipleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetIndexPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetSummaryPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetBloomFilterPath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
+}
+
+func deleteSingleFiles(filename string) {
+	e := os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
 }
