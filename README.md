@@ -1,4 +1,4 @@
-# Projekat-NAISP a
+# Projekat-NAISP
 
 ## Structure
 
