@@ -51,6 +51,6 @@ func (memtable *Memtable) Delete(key string) bool {
 func (memtable *Memtable) Flush() {
 	var records = memtable.Records.GetSortedRecordsList()
 	fmt.Println(records)
-	sstable.Create(records)
+	sstable.Create(records, 1)
 	memtable.Records.Clear()
 }
