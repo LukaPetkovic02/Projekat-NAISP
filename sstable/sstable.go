@@ -14,23 +14,15 @@ import (
 
 // TODO: Get config from config file and check if single or multiple files are to be written
 // TODO: Add default config in engine->constants.go
-func Create(listOfRecords []types.Record) {
+func Create(listOfRecords []types.Record, level int) {
 	if config.Values.Structure == "multiple-files" {
-		writeToMultipleFiles(listOfRecords)
+		writeToMultipleFiles(listOfRecords, level)
 	} else {
-		writeToSingleFile(listOfRecords)
+		writeToSingleFile(listOfRecords, level)
 	}
 }
 
-func CreateForLevel(listOfRecords []types.Record, level int) {
-	if config.Values.Structure == "multiple-files" {
-		writeToMultipleFilesForLevel(listOfRecords, level)
-	} else {
-		writeToSingleFileForLevel(listOfRecords, level)
-	}
-}
-
-func writeToMultipleFilesForLevel(listOfRecords []types.Record, level int) {
+func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 	data := convertRecordsToBytes(listOfRecords)
 	indexes := CreateIndexes(listOfRecords, 0)
 	summary := CreateSummary(listOfRecords, 0)
@@ -67,7 +59,7 @@ func writeToMultipleFilesForLevel(listOfRecords []types.Record, level int) {
 	file.Close()
 }
 
-func writeToSingleFileForLevel(listOfRecords []types.Record, level int) {
+func writeToSingleFile(listOfRecords []types.Record, level int) {
 	var FILENAME = engine.GetTableNexLevelName(level)
 	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -97,65 +89,6 @@ func Read(key string) *types.Record {
 		var record = readFromSingleFile(key)
 		return record
 	}
-}
-
-func writeToMultipleFiles(listOfRecords []types.Record) {
-	data := convertRecordsToBytes(listOfRecords)
-	indexes := CreateIndexes(listOfRecords, 0)
-	summary := CreateSummary(listOfRecords, 0)
-	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
-	var FILENAME = engine.GetTableName() //sets same name for all files, different directories
-
-	for _, record := range listOfRecords {
-		filter.Add([]byte(record.Key))
-	}
-	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	file.Write(data)
-
-	file, err = os.OpenFile(engine.GetIndexPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	file.Write(indexes.Serialize())
-
-	file, err = os.OpenFile(engine.GetSummaryPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(summary)
-	file.Write(summary.Serialize())
-
-	file, err = os.OpenFile(engine.GetBloomFilterPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	file.Write(filter.Serialize())
-	file.Close()
-}
-
-func writeToSingleFile(listOfRecords []types.Record) {
-	var FILENAME = engine.GetTableName()
-	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		panic(err)
-	}
-	var filter = bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
-	for _, record := range listOfRecords {
-		filter.Add([]byte(record.Key))
-	}
-	var filterLength = uint64(len(filter.Serialize()))
-	var summary = CreateSummary(listOfRecords, filterLength)
-	var summaryLength = uint64(len(summary.Serialize()))
-	var indexes = CreateIndexes(listOfRecords, filterLength+summaryLength)
-	var data = convertRecordsToBytes(listOfRecords)
-	file.Write(data)
-	file.Write(indexes.Serialize())
-	file.Write(summary.Serialize())
-	file.Write(filter.Serialize())
-	file.Close()
 }
 
 func convertRecordsToBytes(listOfRecords []types.Record) []byte {
