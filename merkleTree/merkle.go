@@ -95,10 +95,20 @@ func Traverse_tree(root *Node) [][]byte {
 	}
 
 	return hashed_nodes
+
 }
 
-func Serialize_tree(hashed_nodes [][]byte) {
+func MerkleTree(leaf []rec.Record) *MerkleRoot {
 
+	var leafNodes = Leafs(leaf)
+	var root = Make_tree(leafNodes)
+
+	return &MerkleRoot{Root: root}
+}
+
+func (mr *MerkleRoot) Serialize() {
+
+	var hashed_nodes = Traverse_tree(mr.Root)
 	file, err := os.OpenFile(engine.GetMetaDataFilePath(), os.O_RDWR|os.O_CREATE, 0777)
 	if err != nil {
 		panic(err)
