@@ -32,7 +32,7 @@ func HandleGet(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) *type
 }
 func HandleDelete(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) bool {
 	// TODO: check if request can be made with token bucket
-	//TODO: check if key exist in memtable and set tombstone to true
+
 	var record = HandleGet(key, memtable, LRU)
 	if record != nil {
 		record.Tombstone = true
@@ -40,7 +40,6 @@ func HandleDelete(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) bo
 			memtable.Add(*record)
 			return true
 		}
-
 	} else {
 		fmt.Println("Record doesn't exist")
 	}

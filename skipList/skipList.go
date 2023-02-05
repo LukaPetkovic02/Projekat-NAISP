@@ -8,11 +8,11 @@ import (
 )
 
 type SkipList struct {
-	maxHeight    int
-	height       int
-	size         int
-	max_capacity int
-	head         *SkipListNode
+	maxHeight int
+	height    int
+	size      int
+	//max_capacity int
+	head *SkipListNode
 }
 
 type SkipListNode struct {
@@ -30,12 +30,12 @@ func (s *SkipListNode) InitSP(podatak types.Record, level int) SkipListNode {
 	return *s
 }
 
-func (s *SkipList) InitSP(maxHeight int, height int, capacity int) SkipList {
+func (s *SkipList) InitSP(maxHeight int, height int) SkipList {
 	s.maxHeight = maxHeight
 	s.height = height
 	s.size = 0
 	s.head = &SkipListNode{next: make([]*SkipListNode, height+1)}
-	s.max_capacity = capacity
+	//s.max_capacity = capacity
 	return *s
 }
 
@@ -95,7 +95,7 @@ func (s *SkipList) GetSortedRecordsList() []types.Record {
 		x = x.next[0]
 	}
 	//treba isprazniti listu kada se ona popuni
-	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+	s.InitSP(s.maxHeight, s.height)
 	return sortNodeovi[1:]
 }
 
@@ -119,9 +119,9 @@ func (s *SkipList) Add(podatak types.Record) bool {
 		}
 	}
 
-	if s.size >= s.max_capacity {
-		return false
-	}
+	//if s.size >= s.max_capacity {
+	//	return false
+	//}
 	//inace dodaj
 	var pod types.Record
 	pod = podatak
@@ -168,7 +168,7 @@ func (s *SkipList) Delete(key string) bool {
 }
 
 func (s *SkipList) Clear() {
-	s.InitSP(s.maxHeight, s.height, s.max_capacity)
+	s.InitSP(s.maxHeight, s.height)
 }
 
 func (s *SkipList) GetSize() int {
