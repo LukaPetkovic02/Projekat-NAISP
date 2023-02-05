@@ -72,12 +72,26 @@ func GetMetaDataFilePath(filename string) string {
 func GetTableName(current_level int) string {
 	return strconv.FormatInt(int64(current_level), 10) + "_" + strconv.FormatInt(time.Now().UnixNano(), 10) + ".bin"
 }
+func GetCMSName(kljuc string) string {
+	return kljuc + ".bin"
+}
+
+func GetHLLName(kljuc string) string {
+	return kljuc + ".bin"
+}
 
 // za trenutno ime fajla racuna trenutni nivo ne znam da li ce mi trebati
 func GetCurrentLevel(filename string) int {
 	split := strings.Split(filename, ",")
 	ret, _ := strconv.Atoi(split[0])
 	return ret
+}
+func GetCMSPath(filename string) string {
+	return filepath.Join(GetDataDir(), DEFAULT_CMS_FOLDER, filename)
+}
+
+func GetHLLPath(filename string) string {
+	return filepath.Join(GetDataDir(), DEFAULT_HLL_FOLDER, filename)
 }
 
 func GetSSTablePath(filename string) string {

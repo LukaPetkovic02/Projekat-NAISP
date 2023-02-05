@@ -117,6 +117,36 @@ func getClosestRecord(key string, file *os.File) Index {
 	return returnIndex
 }
 
+// func getClosestRecordWithPrefix(prefix string, endkey string, file *os.File) *Index {
+// 	var returnIndex Index
+// 	//nextElInPre := prefix
+
+// 	for {
+// 		var tempIndex Index
+// 		var b = make([]byte, 8)
+// 		file.Read(b)
+// 		tempIndex.KeySize = binary.LittleEndian.Uint64(b)
+// 		b = make([]byte, tempIndex.KeySize)
+// 		file.Read(b)
+// 		tempIndex.Key = string(b)
+// 		b = make([]byte, 8)
+// 		file.Read(b)
+// 		tempIndex.Offset = binary.LittleEndian.Uint64(b)
+
+// 		if strings.HasPrefix(tempIndex.Key, prefix) {
+// 			returnIndex = tempIndex
+// 			return &returnIndex
+// 		}
+
+// 		if endkey == tempIndex.Key {
+// 			return nil
+// 		}
+// 		returnIndex = tempIndex
+// 	}
+// }
+
+// 124
+
 func ReadSummaryHeader(file *os.File) Summary {
 	var b = make([]byte, 8)
 	file.Read(b)

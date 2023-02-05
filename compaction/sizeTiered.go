@@ -42,3 +42,31 @@ func SizeTierCompaction(current_level int) {
 		SizeTierCompaction(current_level + 1)
 	}
 }
+
+func GetWithPrefix(prefix string, page_num int, page_size int) {
+	files, err := ioutil.ReadDir(engine.GetTableDir())
+	if err != nil {
+		log.Fatal(err)
+	}
+	var fileNames []string
+	for _, file := range files {
+		fileNames = append(fileNames, file.Name())
+	}
+	sort.Strings(fileNames)
+	for i := 0; i < len(fileNames); i++ {
+		//Udje u fajl i ucita redom elemente
+	}
+}
+
+// func GetAllRecords() []types.Record {
+// 	files, err := ioutil.ReadDir(engine.GetTableDir())
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	list := make([]types.Record, 0)
+// 	for _, file := range files {
+// 		ss := sstable.ReadAllRecordsFromTable(file.Name())
+// 		list = Merge(list, ss)
+// 	}
+// 	return list
+// }

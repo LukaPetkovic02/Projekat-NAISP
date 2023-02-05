@@ -84,14 +84,14 @@ func (hll *HLL) Serialize() []byte {
 	return serializedRecord.Bytes()
 }
 
-func DeSerialize(data []byte) HLL {
+func DeSerialize(data []byte) *HLL {
 	var ret HLL
 
 	ret.m = binary.LittleEndian.Uint64(data[HLL_M_START : HLL_M_START+HLL_M_SIZE])
 	ret.p = data[HLL_M_START]
 	ret.reg = data[HLL_REG_START : HLL_REG_START+ret.m*HLL_REG_SIZE]
 
-	return ret
+	return &ret
 }
 
 func (hll *HLL) GetReq() []uint8 {
