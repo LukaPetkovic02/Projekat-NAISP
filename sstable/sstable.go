@@ -2,6 +2,7 @@ package sstable
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 
@@ -33,18 +34,30 @@ func Read(key string) *types.Record {
 }
 
 func ReadAllRecordsFromTable(filename string) []types.Record {
-	//open file
-	var result []types.Record
+	file, err := os.OpenFile(engine.GetSSTablePath(filename), os.O_RDWR|os.O_CREATE, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	var start int = 0
+
 	if config.Values.Structure == "single-file" {
 		// skip bloom filter, summary and index
 
-		//bloomFilter.ReadFromFile(file)
-		//summary := ReadSummaryHeader(file)
-		//index := readFirstIndex(file)
-		//readIndex(file *os.File, index.offset, index.key)
+		bloomFilter.ReadFromFile(file)
+		ReadSummaryHeader(file)
+		index := readFirstIndex(file)
+		index = readIndex(file, index.Offset, index.Key)
+		start = int(index.Offset)
 	}
-	// read record by record from file till EOF
-	return result
+
+	log, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	return types.ReadRecords(log[start:])
+
 }
 
 func readFromMultipleFiles(key string) *types.Record {
