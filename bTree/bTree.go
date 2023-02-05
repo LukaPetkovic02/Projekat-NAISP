@@ -75,7 +75,7 @@ func (s *Stablo) Get(SearchKey string) *types.Record { //ako nema vraca nil, ako
 	for x != nil {
 		t = true
 		for i = 0; i < len(x.Value)-1 && string(x.Value[i].Key) != ""; i++ {
-			if SearchKey == x.Value[i].Key && x.Value[i].Tombstone == false {
+			if SearchKey == x.Value[i].Key {
 				return &x.Value[i]
 			} else if x.Value[i].Key > SearchKey {
 				x = x.Children[i]

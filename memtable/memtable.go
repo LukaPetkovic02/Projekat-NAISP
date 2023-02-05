@@ -5,6 +5,7 @@ import (
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/wal"
 )
 
 type Data interface {
@@ -51,4 +52,5 @@ func (memtable *Memtable) Flush() {
 	fmt.Println(records)
 	sstable.Create(records, 1)
 	memtable.Records.Clear()
+	wal.Clear()
 }

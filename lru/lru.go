@@ -19,10 +19,10 @@ func (lru *LRUCache) Add(rec types.Record) {
 	if in {
 
 		lru.Recent.MoveToFront(el)
-		el.Value = rec
+		el.Value = &rec
 	} else {
 
-		lru.Hash_Map[rec.Key] = lru.Recent.PushFront(rec)
+		lru.Hash_Map[rec.Key] = lru.Recent.PushFront(&rec)
 
 		if lru.LRU_Size < lru.Recent.Len() {
 			delete(lru.Hash_Map, lru.Recent.Back().Value.(types.Record).Key)
@@ -37,7 +37,7 @@ func (lru *LRUCache) Read(kljuc string) *types.Record {
 
 	el, in := lru.Hash_Map[kljuc]
 
-	if in && el.Value.(types.Record).Tombstone == false {
+	if in && el.Value.(*types.Record).Tombstone == false {
 
 		lru.Recent.MoveToFront(el)
 		return el.Value.(*types.Record)

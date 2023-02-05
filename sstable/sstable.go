@@ -217,16 +217,20 @@ func ReadAllRecordsFromTable(filename string) []types.Record {
 		// skip bloom filter, summary and index
 
 		bloomFilter.ReadFromFile(file)
+		offset, _ := file.Seek(0, io.SeekCurrent)
+		fmt.Println(offset)
 		ReadSummaryHeader(file)
 		index := readFirstIndex(file)
 		index = readIndex(file, index.Offset, index.Key)
 		start = int(index.Offset)
 	}
+	file.Seek(0, 0)
 
 	log, err := io.ReadAll(file)
 	if err != nil {
 		panic(err)
 	}
 
+	file.Close()
 	return types.ReadRecords(log[start:])
 }

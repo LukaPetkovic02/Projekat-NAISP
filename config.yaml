@@ -1,5 +1,5 @@
 walSegment: 5
-structure: multiple-files # "multiple-files", "single-file"
+structure: single-file # "multiple-files", "single-file"
 bloomFilter:
   precision: 0.01
 cache:
@@ -16,7 +16,7 @@ tokenBucket:
   rate: 1000
 memtable:
   threshold: 50
-  size: 20
+  size: 3
   use: b-tree #skip-list, b-tree
 summary:
   blockSize: 2

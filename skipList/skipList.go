@@ -75,7 +75,7 @@ func (s *SkipList) Get(searchKey string) *types.Record { //vraca vrednost koja o
 	x := s.head
 	var i int
 	for i = s.height; i >= 0; i-- {
-		if x.podatak.Key == searchKey && x.podatak.Tombstone == false {
+		if x.podatak.Key == searchKey {
 			return &x.podatak
 		}
 		for x.next[i] != nil && x.next[i].podatak.Key <= searchKey {
