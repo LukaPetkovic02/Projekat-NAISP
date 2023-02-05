@@ -37,7 +37,7 @@ func (lru *LRUCache) Read(kljuc string) *types.Record {
 
 	el, in := lru.Hash_Map[kljuc]
 
-	if in {
+	if in && el.Value.(types.Record).Tombstone == false {
 
 		lru.Recent.MoveToFront(el)
 		return el.Value.(*types.Record)
