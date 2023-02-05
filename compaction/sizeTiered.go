@@ -1,6 +1,7 @@
 package compaction
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"sort"
@@ -9,7 +10,9 @@ import (
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 func SizeTierCompaction(current_level int) {
@@ -58,15 +61,45 @@ func GetWithPrefix(prefix string, page_num int, page_size int) {
 	}
 }
 
-// func GetAllRecords() []types.Record {
-// 	files, err := ioutil.ReadDir(engine.GetTableDir())
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	list := make([]types.Record, 0)
-// 	for _, file := range files {
-// 		ss := sstable.ReadAllRecordsFromTable(file.Name())
-// 		list = Merge(list, ss)
-// 	}
-// 	return list
-// }
+func GetAllRecords() []types.Record {
+	files, err := ioutil.ReadDir(engine.GetTableDir())
+	if err != nil {
+		log.Fatal(err)
+	}
+	list := make([]types.Record, 0)
+	for _, file := range files {
+		ss := sstable.ReadAllRecordsFromTable(file.Name())
+		list = Merge(list, ss)
+	}
+	return list
+}
+
+func GetPrefix(memtable memtable.Memtable, pre string, size int, page int) {
+	records := GetAllRecords()
+	records = Merge(memtable.Records.GetSortedRecordsList(), records)
+	final := make([]types.Record, 0)
+	for i := 0; i < len(records); i++ {
+		if strings.HasPrefix(records[i].Key, pre) && records[i].Tombstone == false {
+			final = append(final, records[i])
+		}
+	}
+	fmt.Println("Nadjeni elementi: ")
+	for i := size * (page - 1); i < size*page && i < len(final); i++ {
+		fmt.Println(final[i])
+	}
+}
+
+func GetRange(memtable memtable.Memtable, start string, end string, size int, page int) {
+	records := GetAllRecords()
+	records = Merge(memtable.Records.GetSortedRecordsList(), records)
+	final := make([]types.Record, 0)
+	for i := 0; i < len(records); i++ {
+		if start <= records[i].Key && end >= records[i].Key && records[i].Tombstone == false {
+			final = append(final, records[i])
+		}
+	}
+	fmt.Println("Nadjeni elementi: ")
+	for i := size * (page - 1); i < size*page && i < len(final); i++ {
+		fmt.Println(final[i])
+	}
+}
