@@ -3,29 +3,34 @@ package main
 import (
 	"fmt"
 
-	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/App"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/bTree"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/skipList"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/tokenBucket"
 )
 
 func main() {
-	// engine.CreateDataFolderStructure()
-	// var LRU = lru.NewLRU(int(config.Values.Cache.Size))
+	engine.CreateDataFolderStructure()
+	var LRU = lru.NewLRU(int(config.Values.Cache.Size))
 
-	// if config.Values.Memtable.Use == "skip-list" {
-	// 	var sl = &skipList.SkipList{}
-	// 	sl.InitSP(int(config.Values.SkipList.MaxLevel), int(config.Values.SkipList.Height))
-	// 	var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
-	// 	var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
-	// 	App.TUI(memtable, LRU, token)
-	// } else {
-	// 	fmt.Println("joe")
-	// 	var sl = &bTree.Stablo{}
-	// 	sl.InitSP(config.Values.Btree.MaxNode)
-	// 	var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
-	// 	var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
-	// 	App.TUI(memtable, LRU, token)
-	// }
-	x := sstable.ReadAllRecordsFromTable("1_1675613797985154000.bin")
-	fmt.Println(x)
+	if config.Values.Memtable.Use == "skip-list" {
+		var sl = &skipList.SkipList{}
+		sl.InitSP(int(config.Values.SkipList.MaxLevel), int(config.Values.SkipList.Height))
+		var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
+		var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
+		App.TUI(memtable, LRU, token)
+	} else {
+		fmt.Println("joe")
+		var sl = &bTree.Stablo{}
+		sl.InitSP(config.Values.Btree.MaxNode)
+		var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
+		var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
+		App.TUI(memtable, LRU, token)
+	}
 
 	// var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
 	// var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)

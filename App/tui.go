@@ -11,6 +11,9 @@ import (
 // TODO: Add Range Scan and Get List options
 func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.TokenBucket) {
 	var isRunning = true
+	// for _, v := range wal.ReadWal() {
+	// 	HandleAdd(v.Key, v.Value, memtable, LRU)
+	// }
 	for isRunning {
 		printMenu()
 		println("Select option: ")
