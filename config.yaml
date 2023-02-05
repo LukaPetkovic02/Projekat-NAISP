@@ -1,0 +1,22 @@
+walSegment: 5
+structure: multiple-files # "multiple-files", "single-file"
+bloomFilter:
+  precision: 0.01
+cache:
+  size: 10
+skipList:
+  maxLevel: 7
+  height : 5
+btree:
+  maxNode: 2
+lsm:
+  maxLevel: 3
+tokenBucket:
+  size: 2
+  rate: 10
+memtable:
+  threshold: 50
+  size: 3
+  use: b-tree #skip-list, b-tree
+summary:
+  blockSize: 2
