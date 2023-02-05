@@ -8,9 +8,9 @@ import (
 )
 
 type Stablo struct {
-	Max          int
-	Head         *Node
-	Max_capacity int
+	Max  int
+	Head *Node
+	//Max_capacity int
 	Cur_capacity int
 }
 
@@ -32,7 +32,7 @@ func (s *Node) InitSP(Max int, Parent *Node) Node {
 	return *s
 }
 
-func (st *Stablo) InitSP(Max int, Max_capacity int) Stablo {
+func (st *Stablo) InitSP(Max int) Stablo {
 	nilRoditelj := new(Node)
 	st.Head = new(Node)
 	st.Head.InitSP(Max, nilRoditelj)
@@ -40,7 +40,7 @@ func (st *Stablo) InitSP(Max int, Max_capacity int) Stablo {
 	//st.Head.Children = make([]*Node, Max+2)
 	//st.Head.InitSP(Key, Value, Max, nilRoditelj)
 	st.Max = Max
-	st.Max_capacity = Max_capacity
+	//st.Max_capacity = Max_capacity
 	st.Cur_capacity = 0
 	return *st
 }
@@ -224,9 +224,9 @@ func (s *Stablo) Add(podatak types.Record) bool {
 		return true
 	}
 
-	if s.Cur_capacity >= s.Max_capacity {
-		return false
-	}
+	//if s.Cur_capacity >= s.Max_capacity {
+	//	return false
+	//}
 
 	//ako ne postoji onda je dodavanje
 	x := s.Head
@@ -407,7 +407,7 @@ func srediRoditelje(x *Node) {
 func (s *Stablo) GetSortedRecordsList() []types.Record { //vraca listu sortiranih podataka
 	Value := make([]types.Record, 0)
 	s.GetSortedRecordsListFunc(s.Head, &Value)
-	s.InitSP(s.Max, s.Max_capacity) //isprazni stablo
+	s.InitSP(s.Max) //isprazni stablo
 	return Value
 }
 
@@ -427,7 +427,7 @@ func (s *Stablo) GetSortedRecordsListFunc(n *Node, Value *[]types.Record) {
 }
 
 func (s *Stablo) Clear() {
-	s.InitSP(s.Max, s.Max_capacity)
+	s.InitSP(s.Max)
 }
 func (s *Stablo) GetSize() int {
 	return s.Cur_capacity

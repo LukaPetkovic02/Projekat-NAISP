@@ -13,7 +13,7 @@ func main() {
 	engine.CreateDataFolderStructure()
 	var sl = &skipList.SkipList{}
 	var LRU = lru.NewLRU(int(config.Values.Cache.Size))
-	sl.InitSP(10, 10, 100)
+	sl.InitSP(10, 10)
 	var memtable = memtable.Init(100, sl)
 	App.TUI(memtable, LRU)
 

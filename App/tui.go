@@ -29,7 +29,7 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 			fmt.Println(string(record.Value))
 		case "3":
 			key := getKey()
-			HandleDelete(key, memtable)
+			HandleDelete(key, memtable, LRU)
 		case "4":
 			println("Compact")
 		case "5":

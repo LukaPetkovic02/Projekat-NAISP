@@ -1,6 +1,8 @@
 package App
 
 import (
+	"fmt"
+
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
@@ -28,18 +30,19 @@ func HandleGet(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) *type
 	}
 	return sstable.Read(key)
 }
-func HandleDelete(key string, memtable *memtable.Memtable) bool {
+func HandleDelete(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) bool {
 	// TODO: check if request can be made with token bucket
 	//TODO: check if key exist in memtable and set tombstone to true
-	// var record = HandleGet(key, memtable)
-	// if record != nil {
-	// 	record.Tombstone = true
-	// if wal.Append(newRecord) {
-	// 	memtable.Add(key, newRecord)
-	// }
-	// }else{
-	// fmt.Println("Record doesn't exist")
-	// }
+	var record = HandleGet(key, memtable, LRU)
+	if record != nil {
+		record.Tombstone = true
+		if wal.Append(*record) {
+			memtable.Add(*record)
+		}
+		return true
+	} else {
+		fmt.Println("Record doesn't exist")
+	}
 	return false
 }
 
