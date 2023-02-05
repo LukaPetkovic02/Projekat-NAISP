@@ -15,8 +15,8 @@ func load() *Config {
 				Size: 10,
 			},
 			SkipList: SkipList{
-				MaxLevel: 7,
-				Height:   3,
+				MaxLevel: 10,
+				Height:   5,
 			},
 			Lsm: Lsm{
 				MaxLevel: 5,

@@ -126,10 +126,14 @@ func (s *SkipList) Add(podatak types.Record) bool {
 	var pod types.Record
 	pod = podatak
 	var noviNode SkipListNode
+	fmt.Println(s.height)
+	//visinapre:=s.height
 	noviNode.InitSP(pod, s.roll())
+	//visinaposle:=s.height
+
 	x := s.head
 	var i int
-
+	fmt.Println(s.height)
 	for i = len(noviNode.next) - 1; i >= 0; i-- {
 		for x.next[i] != nil && x.next[i].podatak.Key < noviNode.podatak.Key {
 			x = x.next[i]
