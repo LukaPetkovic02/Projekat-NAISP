@@ -33,14 +33,13 @@ func (memtable *Memtable) Get(key string) *types.Record {
 }
 
 func (memtable *Memtable) Add(record types.Record) bool {
-	// memtable.Records.Put(record)
+	memtable.Records.Add(record)
 
-	// if memtable.MaxSize <= memtable.Records.GetSize() {
-	// 		memtable.Flush()
-	// }
-	var x = memtable.Records.Add(record)
-	println("Memtable size: ", memtable.Records.GetSize())
-	return x
+	if memtable.MaxSize <= memtable.Records.GetSize() {
+		memtable.Flush()
+	}
+
+	return true
 }
 
 func (memtable *Memtable) Delete(key string) bool {

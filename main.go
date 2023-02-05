@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/App"
-	btree "github.com/LukaPetkovicSV16/Projekat-NAISP/bTree"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/bTree"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
@@ -17,10 +17,9 @@ func main() {
 	var LRU = lru.NewLRU(int(config.Values.Cache.Size))
 	if config.Values.Memtable.Use == "skip-list" {
 		var sl = &skipList.SkipList{}
-		//max nivo,
 		sl.InitSP(int(config.Values.SkipList.MaxLevel), int(config.Values.SkipList.MaxLevel/2))
 	} else {
-		var sl = &btree.Stablo{}
+		var sl = &bTree.Stablo{}
 		sl.InitSP(config.Values.Btree.MaxNode)
 	}
 
