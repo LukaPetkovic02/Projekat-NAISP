@@ -32,7 +32,6 @@ func HandleGet(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) *type
 }
 func HandleDelete(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) bool {
 	// TODO: check if request can be made with token bucket
-
 	var record = HandleGet(key, memtable, LRU)
 	if record != nil {
 		record.Tombstone = true

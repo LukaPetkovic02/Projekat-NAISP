@@ -6,6 +6,9 @@ cache:
   size: 10
 skipList:
   maxLevel: 7
+  height : 3
+btree:
+  maxNode: 2
 lsm:
   maxLevel: 5
 tokenBucket:
@@ -13,7 +16,7 @@ tokenBucket:
   rate: 1000
 memtable:
   threshold: 50
-  size: 120
+  size: 20
   use: skip-list #skip-list, b-tree
 summary:
   blockSize: 2

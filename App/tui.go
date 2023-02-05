@@ -5,10 +5,11 @@ import (
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/tokenBucket"
 )
 
 // TODO: Add Range Scan and Get List options
-func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
+func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.TokenBucket) {
 	var isRunning = true
 	for isRunning {
 		printMenu()
@@ -16,20 +17,40 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache) {
 		var option = getUserInput()
 		switch option {
 		case "1":
-			key, value := getKeyValue()
-			HandleAdd(key, []byte(value), memtable, LRU)
-		case "2":
-			key := getKey()
-			var record = HandleGet(key, memtable, LRU)
-			if record == nil {
-				fmt.Println("Record doesn't exist")
-				break
+
+			if token.RequestApproval() {
+				key, value := getKeyValue()
+				HandleAdd(key, []byte(value), memtable, LRU)
 			}
-			fmt.Println(record)
-			fmt.Println(string(record.Value))
+			// key, value := getKeyValue()
+			// HandleAdd(key, []byte(value), memtable, LRU)
+
+		case "2":
+			if token.RequestApproval() {
+				key := getKey()
+				var record = HandleGet(key, memtable, LRU)
+				if record == nil {
+					fmt.Println("Record doesn't exist")
+					break
+				}
+				fmt.Println(record)
+				fmt.Println(string(record.Value))
+			}
+			// var record = HandleGet(key, memtable, LRU)
+			// if record == nil {
+			// 	fmt.Println("Record doesn't exist")
+			// 	break
+			// }
+			// fmt.Println(record)
+			// fmt.Println(string(record.Value))
 		case "3":
-			key := getKey()
-			HandleDelete(key, memtable, LRU)
+
+			if token.RequestApproval() {
+				key := getKey()
+				HandleDelete(key, memtable, LRU)
+			}
+			// key := getKey()
+			// HandleDelete(key, memtable, LRU)
 		case "4":
 			println("Compact")
 		case "5":

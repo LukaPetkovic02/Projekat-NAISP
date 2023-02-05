@@ -17,6 +17,11 @@ type Config struct {
 	TokenBucket TokenBucket `yaml:"tokenBucket"`
 	Memtable    Memtable    `yaml:"memtable"`
 	Summary     Summary     `yaml:"summary"`
+	Btree       Btree       `yaml:"btree"`
+}
+
+type Btree struct {
+	MaxNode int `yaml:"maxNode"`
 }
 type BloomFilter struct {
 	Precision float64 `yaml:"precision"`
@@ -26,6 +31,7 @@ type Cache struct {
 }
 type SkipList struct {
 	MaxLevel uint `yaml:"maxLevel"`
+	Height   int  `yaml:"height"`
 }
 type Lsm struct {
 	MaxLevel uint `yaml:"maxLevel"`

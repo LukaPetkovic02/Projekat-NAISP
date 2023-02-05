@@ -16,6 +16,7 @@ func load() *Config {
 			},
 			SkipList: SkipList{
 				MaxLevel: 7,
+				Height:   3,
 			},
 			Lsm: Lsm{
 				MaxLevel: 5,
@@ -31,6 +32,9 @@ func load() *Config {
 			},
 			Summary: Summary{
 				BlockSize: 5,
+			},
+			Btree: Btree{
+				MaxNode: 2,
 			},
 		}
 	}

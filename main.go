@@ -2,20 +2,31 @@ package main
 
 import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/App"
+	btree "github.com/LukaPetkovicSV16/Projekat-NAISP/bTree"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/skipList"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/tokenBucket"
 )
 
 func main() {
 	engine.CreateDataFolderStructure()
 	var sl = &skipList.SkipList{}
 	var LRU = lru.NewLRU(int(config.Values.Cache.Size))
-	sl.InitSP(10, 10, 100)
-	var memtable = memtable.Init(100, sl)
-	App.TUI(memtable, LRU)
+	if config.Values.Memtable.Use == "skip-list" {
+		var sl = &skipList.SkipList{}
+		//max nivo,
+		sl.InitSP(int(config.Values.SkipList.MaxLevel), int(config.Values.SkipList.MaxLevel/2))
+	} else {
+		var sl = &btree.Stablo{}
+		sl.InitSP(config.Values.Btree.MaxNode)
+	}
+
+	var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
+	var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
+	App.TUI(memtable, LRU, token)
 
 	//fmt.Println(cms.Deserialize(bajtovi).Encoder)
 	//fmt.Println(cms.Deserialize(bajtovi).M)

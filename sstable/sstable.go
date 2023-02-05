@@ -9,13 +9,15 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/bloomFilter"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/merkleTree"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 )
 
 func Create(listOfRecords []types.Record, level int) {
 	var FILENAME = engine.GetTableName(level)
-	// MerkleTree(listOfRecords)
-	// zapisi u fajl(strings.Replace(FILENAME, "bin", "txt", 1))
+	merkel := merkleTree.MerkleTree(listOfRecords)
+	merkel.Serialize(FILENAME)
+
 	if config.Values.Structure == "multiple-files" {
 		writeToMultipleFiles(listOfRecords, FILENAME)
 	} else {
@@ -140,7 +142,6 @@ func writeToMultipleFiles(listOfRecords []types.Record, FILENAME string) {
 	}
 	file.Write(filter.Serialize())
 	file.Close()
-
 }
 
 func writeToSingleFile(listOfRecords []types.Record, FILENAME string) {
@@ -166,7 +167,10 @@ func writeToSingleFile(listOfRecords []types.Record, FILENAME string) {
 }
 
 func Delete(filename string) {
-	//delete merkel stablo(strings.Replace(FILENAME, "bin", "txt", 1))
+	e := os.Remove(engine.GetMetaDataFilePath(filename))
+	if e != nil {
+		log.Fatal(e)
+	}
 
 	if config.Values.Structure == "multiple-files" {
 		deleteMultipleFiles(filename)
@@ -225,5 +229,4 @@ func ReadAllRecordsFromTable(filename string) []types.Record {
 	}
 
 	return types.ReadRecords(log[start:])
-
 }

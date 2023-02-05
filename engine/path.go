@@ -58,13 +58,13 @@ func GetDataDir() string {
 	return filepath.Join(DefaultDataPath, DefaultDataDir)
 }
 
-func GetMetaDataFilePath() string {
+func GetMetaDataFilePath(filename string) string {
 	_, err := ioutil.ReadDir(GetDataDir())
 	if err != nil {
 		panic(err)
 	}
 
-	return filepath.Join(GetDataDir(), "meta", "Metadata.txt")
+	return filepath.Join(GetDataDir(), "meta", strings.Replace(filename, "bin", "txt", 1))
 }
 
 // SSTable
