@@ -12,8 +12,8 @@ btree:
 lsm:
   maxLevel: 3
 tokenBucket:
-  size: 10
-  rate: 1000
+  size: 2
+  rate: 10
 memtable:
   threshold: 50
   size: 3

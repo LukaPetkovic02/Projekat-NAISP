@@ -3,41 +3,41 @@ package tokenBucket
 import (
 	"fmt"
 	"time"
+
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 )
 
-func Init(maxTokens uint64, rate uint64) *TokenBucket {
+func Init() *TokenBucket {
 
 	return &TokenBucket{
-		rate:           time.Duration(rate * uint64(time.Millisecond)),
-		maxTokens:      maxTokens,
-		currentTokens:  0,
-		lastRefillTime: time.Now(),
+		rate:           uint(config.Values.TokenBucket.Rate),
+		currentTokens:  config.Values.TokenBucket.Size,
+		lastRefillTime: uint(time.Now().Unix()),
 	}
 
 }
 
 type TokenBucket struct {
-	rate           time.Duration //vremenski period nakon kog reffilujemo bucket
-	maxTokens      uint64        //maksimalan broj zahtjeva u odredjenom vremenskom periodu
-	currentTokens  uint64        //trenutni broj zahtjeva u bucketu
-	lastRefillTime time.Time     //vrijeme poslednjeg refreshovanja bucketa
+	rate           uint //vremenski period nakon kog reffilujemo bucket
+	currentTokens  uint //trenutni broj zahtjeva u bucketu
+	lastRefillTime uint //vrijeme poslednjeg refreshovanja bucketa
 
 }
 
 func (tb *TokenBucket) RequestApproval() bool {
 
-	now := time.Now()
+	now := uint(time.Now().Unix())
 
-	if now.Sub(tb.lastRefillTime) > tb.rate { //ako je proslo vise od 1 minute refillujemo bucket i dodamo zahtjev koji je upravo poslat
-		tb.currentTokens = 1
-		tb.lastRefillTime = time.Now()
+	if now-tb.lastRefillTime > tb.rate { //ako je proslo vise od dozvoljenog vremena refillujemo bucket i dodamo zahtjev koji je upravo poslat
+		tb.currentTokens = config.Values.TokenBucket.Size
+		tb.lastRefillTime = now
 		return true
 	} else {
-		if tb.currentTokens == tb.maxTokens { //ako je bucket pun odbijamo zahtjev uz poruku
+		if tb.currentTokens == 0 { //ako je bucket pun odbijamo zahtjev uz poruku
 			fmt.Println("Request denied !")
 			return false
 		} else { //ukoliko ima mjesta propustamo zahtjev
-			tb.currentTokens += 1
+			tb.currentTokens -= 1
 			return true
 		}
 	}

@@ -27,8 +27,6 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.Toke
 				key, value := getKeyValue()
 				HandleAdd(key, []byte(value), memtable, LRU)
 			}
-			// key, value := getKeyValue()
-			// HandleAdd(key, []byte(value), memtable, LRU)
 
 		case "2":
 			if token.RequestApproval() {
@@ -41,21 +39,14 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.Toke
 				fmt.Println(record)
 				fmt.Println(string(record.Value))
 			}
-			// var record = HandleGet(key, memtable, LRU)
-			// if record == nil {
-			// 	fmt.Println("Record doesn't exist")
-			// 	break
-			// }
-			// fmt.Println(record)
-			// fmt.Println(string(record.Value))
+
 		case "3":
 
 			if token.RequestApproval() {
 				key := getKey()
 				HandleDelete(key, memtable, LRU)
 			}
-			// key := getKey()
-			// HandleDelete(key, memtable, LRU)
+
 		case "4":
 			println("Compact")
 			compaction.SizeTierCompaction(1)
