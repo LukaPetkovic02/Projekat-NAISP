@@ -31,14 +31,14 @@ func main() {
 		sl.InitSP(int(config.Values.SkipList.MaxLevel), int(config.Values.SkipList.Height))
 		var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
 		var token = tokenBucket.Init()
-		da(memtable, LRU, token)
+		// da(memtable, LRU, token)
 		App.TUI(memtable, LRU, token)
 	} else {
 		var sl = &bTree.Stablo{}
 		sl.InitSP(config.Values.Btree.MaxNode)
 		var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
 		var token = tokenBucket.Init()
-		da(memtable, LRU, token)
+		// da(memtable, LRU, token)
 		App.TUI(memtable, LRU, token)
 	}
 }
