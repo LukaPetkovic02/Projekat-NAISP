@@ -35,6 +35,7 @@ func SizeTierCompaction(current_level int) {
 		sstable.Create(ss3, current_level+1)
 		sstable.Delete(currentLevelFiles[i-1])
 		sstable.Delete(currentLevelFiles[i])
+
 	}
 
 	if current_level+1 != int(config.Values.Lsm.MaxLevel) {

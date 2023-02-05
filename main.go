@@ -11,14 +11,14 @@ import (
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/tokenBucket"
 )
 
-func da(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.TokenBucket) {
-	App.HandleAdd("a", []byte("fff"), memtable, LRU)
-	App.HandleAdd("b", []byte("fff"), memtable, LRU)
-	App.HandleAdd("c", []byte("fff"), memtable, LRU)
-	App.HandleAdd("a", []byte("gggg"), memtable, LRU)
-	App.HandleDelete("b", memtable, LRU)
-	App.HandleAdd("j", []byte("fff"), memtable, LRU)
-}
+// func da(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.TokenBucket) {
+// 	App.HandleAdd("a", []byte("fff"), memtable, LRU)
+// 	App.HandleAdd("b", []byte("fff"), memtable, LRU)
+// 	App.HandleAdd("c", []byte("fff"), memtable, LRU)
+// 	App.HandleAdd("a", []byte("gggg"), memtable, LRU)
+// 	App.HandleDelete("b", memtable, LRU)
+// 	App.HandleAdd("j", []byte("fff"), memtable, LRU)
+// }
 
 func main() {
 	engine.CreateDataFolderStructure()
@@ -35,9 +35,9 @@ func main() {
 		sl.InitSP(config.Values.Btree.MaxNode)
 		var memtable = memtable.Init(int(config.Values.Memtable.Size), sl)
 		var token = tokenBucket.Init(uint64(config.Values.TokenBucket.Size), config.Values.TokenBucket.Rate)
-		da(memtable, LRU, token)
 		App.TUI(memtable, LRU, token)
 	}
+
 	// x := sstable.ReadAllRecordsFromTable("2_1675616501630928100.bin")
 	// for _, v := range x {
 	// 	fmt.Println(v)

@@ -1,6 +1,7 @@
 package sstable
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -122,18 +123,21 @@ func writeToMultipleFiles(listOfRecords []types.Record, FILENAME string) {
 		panic(err)
 	}
 	file.Write(data)
+	file.Close()
 
 	file, err = os.OpenFile(engine.GetIndexPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 	file.Write(indexes.Serialize())
+	file.Close()
 
 	file, err = os.OpenFile(engine.GetSummaryPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
 	}
 	file.Write(summary.Serialize())
+	file.Close()
 
 	file, err = os.OpenFile(engine.GetBloomFilterPath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -179,20 +183,24 @@ func Delete(filename string) {
 }
 
 func deleteMultipleFiles(filename string) {
-	e := os.Remove(engine.GetSSTablePath(filename))
+	e := os.Remove(engine.GetSummaryPath(filename))
 	if e != nil {
-		log.Fatal(e)
-	}
-	e = os.Remove(engine.GetIndexPath(filename))
-	if e != nil {
-		log.Fatal(e)
-	}
-	e = os.Remove(engine.GetSummaryPath(filename))
-	if e != nil {
+		fmt.Println("3")
 		log.Fatal(e)
 	}
 	e = os.Remove(engine.GetBloomFilterPath(filename))
 	if e != nil {
+		fmt.Println("4")
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetSSTablePath(filename))
+	if e != nil {
+		fmt.Println("1")
+		log.Fatal(e)
+	}
+	e = os.Remove(engine.GetIndexPath(filename))
+	if e != nil {
+		fmt.Println("2")
 		log.Fatal(e)
 	}
 }
@@ -220,8 +228,8 @@ func ReadAllRecordsFromTable(filename string) []types.Record {
 		index := readFirstIndex(file)
 		index = readIndex(file, index.Offset, index.Key)
 		start = int(index.Offset)
+		file.Seek(0, 0)
 	}
-	file.Seek(0, 0)
 
 	log, err := io.ReadAll(file)
 	if err != nil {

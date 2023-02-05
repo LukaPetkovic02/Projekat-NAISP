@@ -1,5 +1,5 @@
 walSegment: 5
-structure: single-file # "multiple-files", "single-file"
+structure: multiple-files # "multiple-files", "single-file"
 bloomFilter:
   precision: 0.01
 cache:
