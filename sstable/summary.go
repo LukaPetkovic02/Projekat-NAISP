@@ -138,3 +138,17 @@ func ReadSummaryHeader(file *os.File) Summary {
 		EndKey:       endKey,
 	}
 }
+
+func readFirstIndex(file *os.File) *Index {
+	var index Index
+	var b = make([]byte, 8)
+	file.Read(b)
+	index.KeySize = binary.LittleEndian.Uint64(b)
+	b = make([]byte, index.KeySize)
+	file.Read(b)
+	index.Key = string(b)
+	b = make([]byte, 8)
+	file.Read(b)
+	index.Offset = binary.LittleEndian.Uint64(b)
+	return &index
+}

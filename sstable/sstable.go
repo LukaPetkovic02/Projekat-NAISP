@@ -12,10 +12,13 @@ import (
 )
 
 func Create(listOfRecords []types.Record, level int) {
+	var FILENAME = engine.GetTableName(level)
+	// MerkleTree(listOfRecords)
+	// zapisi u fajl(strings.Replace(FILENAME, "bin", "txt", 1))
 	if config.Values.Structure == "multiple-files" {
-		writeToMultipleFiles(listOfRecords, level)
+		writeToMultipleFiles(listOfRecords, FILENAME)
 	} else {
-		writeToSingleFile(listOfRecords, level)
+		writeToSingleFile(listOfRecords, FILENAME)
 	}
 }
 
@@ -30,9 +33,15 @@ func Read(key string) *types.Record {
 }
 
 func ReadAllRecordsFromTable(filename string) []types.Record {
+	//open file
 	var result []types.Record
 	if config.Values.Structure == "single-file" {
 		// skip bloom filter, summary and index
+
+		//bloomFilter.ReadFromFile(file)
+		//summary := ReadSummaryHeader(file)
+		//index := readFirstIndex(file)
+		//readIndex(file *os.File, index.offset, index.key)
 	}
 	// read record by record from file till EOF
 	return result
@@ -113,7 +122,7 @@ func readFromSingleFile(key string) *types.Record {
 	return nil
 }
 
-func writeToMultipleFiles(listOfRecords []types.Record, level int) {
+func writeToMultipleFiles(listOfRecords []types.Record, FILENAME string) {
 	filter := bloomFilter.CreateBloomFilter(len(listOfRecords), config.Values.BloomFilter.Precision)
 	summary := CreateSummary(listOfRecords, 0)
 	indexes := CreateIndexes(listOfRecords, 0)
@@ -121,7 +130,6 @@ func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 	for _, record := range listOfRecords {
 		filter.Add([]byte(record.Key))
 	}
-	var FILENAME = engine.GetTableName(level) //sets same name for all files, different directories
 	file, err := os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -149,8 +157,7 @@ func writeToMultipleFiles(listOfRecords []types.Record, level int) {
 
 }
 
-func writeToSingleFile(listOfRecords []types.Record, level int) {
-	var FILENAME = engine.GetTableName(level)
+func writeToSingleFile(listOfRecords []types.Record, FILENAME string) {
 	var file, err = os.OpenFile(engine.GetSSTablePath(FILENAME), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		panic(err)
@@ -173,6 +180,8 @@ func writeToSingleFile(listOfRecords []types.Record, level int) {
 }
 
 func Delete(filename string) {
+	//delete merkel stablo(strings.Replace(FILENAME, "bin", "txt", 1))
+
 	if config.Values.Structure == "multiple-files" {
 		deleteMultipleFiles(filename)
 	} else {

@@ -13,7 +13,7 @@ func HandleAdd(key string, value []byte, memtable *memtable.Memtable, LRU *lru.L
 	var newRecord = types.CreateRecord(key, value, false)
 	if wal.Append(newRecord) {
 		memtable.Add(newRecord)
-		// LRU.Add(newRecord)
+		LRU.Add(newRecord)
 	}
 }
 func HandleGet(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) *types.Record {
@@ -22,10 +22,10 @@ func HandleGet(key string, memtable *memtable.Memtable, LRU *lru.LRUCache) *type
 	if record != nil {
 		return record
 	}
-	// var checkCache = LRU.Read(key)
-	// if checkCache != nil {
-	// 	return checkCache
-	// }
+	var checkCache = LRU.Read(key)
+	if checkCache != nil {
+		return checkCache
+	}
 	return sstable.Read(key)
 }
 func HandleDelete(key string, memtable *memtable.Memtable) bool {
