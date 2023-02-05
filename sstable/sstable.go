@@ -33,33 +33,6 @@ func Read(key string) *types.Record {
 	}
 }
 
-func ReadAllRecordsFromTable(filename string) []types.Record {
-	file, err := os.OpenFile(engine.GetSSTablePath(filename), os.O_RDWR|os.O_CREATE, 0777)
-	if err != nil {
-		panic(err)
-	}
-
-	var start int = 0
-
-	if config.Values.Structure == "single-file" {
-		// skip bloom filter, summary and index
-
-		bloomFilter.ReadFromFile(file)
-		ReadSummaryHeader(file)
-		index := readFirstIndex(file)
-		index = readIndex(file, index.Offset, index.Key)
-		start = int(index.Offset)
-	}
-
-	log, err := io.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-
-	return types.ReadRecords(log[start:])
-
-}
-
 func readFromMultipleFiles(key string) *types.Record {
 	var items, err = os.ReadDir(engine.GetBloomDir())
 	if err != nil {
@@ -226,4 +199,31 @@ func deleteSingleFiles(filename string) {
 	if e != nil {
 		log.Fatal(e)
 	}
+}
+
+func ReadAllRecordsFromTable(filename string) []types.Record {
+	file, err := os.OpenFile(engine.GetSSTablePath(filename), os.O_RDWR|os.O_CREATE, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	var start int = 0
+
+	if config.Values.Structure == "single-file" {
+		// skip bloom filter, summary and index
+
+		bloomFilter.ReadFromFile(file)
+		ReadSummaryHeader(file)
+		index := readFirstIndex(file)
+		index = readIndex(file, index.Offset, index.Key)
+		start = int(index.Offset)
+	}
+
+	log, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	return types.ReadRecords(log[start:])
+
 }

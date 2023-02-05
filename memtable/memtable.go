@@ -33,7 +33,7 @@ func (memtable *Memtable) Get(key string) *types.Record {
 }
 
 func (memtable *Memtable) Add(record types.Record) bool {
-	// if memtable.MaxSize <= memtable.Records.GetSize()+engine.DEFAULT_MEMTABLE_THRESHOLD {
+	// if memtable.MaxSize <= memtable.Records.GetSize() {
 	if memtable.Records.GetSize() > 2 {
 		memtable.Flush()
 	}
