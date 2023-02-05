@@ -1,8 +1,6 @@
 package memtable
 
 import (
-	"fmt"
-
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/wal"
@@ -35,7 +33,6 @@ func (memtable *Memtable) Get(key string) *types.Record {
 
 func (memtable *Memtable) Add(record types.Record) bool {
 	memtable.Records.Add(record)
-
 	if memtable.MaxSize <= memtable.Records.GetSize() {
 		memtable.Flush()
 	}
@@ -49,7 +46,7 @@ func (memtable *Memtable) Delete(key string) bool {
 
 func (memtable *Memtable) Flush() {
 	var records = memtable.Records.GetSortedRecordsList()
-	fmt.Println(records)
+	// fmt.Println(records)
 	sstable.Create(records, 1)
 	memtable.Records.Clear()
 	wal.Clear()

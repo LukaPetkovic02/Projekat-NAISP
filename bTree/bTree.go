@@ -189,6 +189,7 @@ func (s *Stablo) Add(podatak types.Record) bool {
 		//s.Head.Value[0].Tombstone = 0
 		//s.Head.Value[0].Timestamp = vreme.Unix()
 		s.Head.Value[0] = podatak
+		s.Cur_capacity += 1
 		return true
 	}
 

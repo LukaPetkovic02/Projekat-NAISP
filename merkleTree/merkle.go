@@ -3,7 +3,6 @@ package merkleTree
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
@@ -82,7 +81,7 @@ func Traverse_tree(root *Node) [][]byte {
 		node := nodes[0]
 		nodes = nodes[1:]
 
-		fmt.Println(node.String())
+		// fmt.Println(node.String())
 
 		if node.Left != nil {
 			nodes = append(nodes, node.Left)

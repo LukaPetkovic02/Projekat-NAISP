@@ -9,6 +9,7 @@ import (
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/engine"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/sstable"
 )
 
 func SizeTierCompaction(current_level int) {
@@ -27,12 +28,13 @@ func SizeTierCompaction(current_level int) {
 
 	sort.Strings(currentLevelFiles) //sortira sve fajlove
 	for i := 1; i < len(currentLevelFiles); i += 2 {
-		//ss1 := ReadAllRecordsFromTable(currentLevelFiles[i-1])
-		//ss2 := ReadAllRecordsFromTable(currentLevelFiles[i])
-		//ss3 := Merge(ss1,ss2)
-		//Create(ss3, current_level+1)
-		//Delete(currentLevelFiles[i-1])
-		//Delete(currentLevelFiles[i])
+		ss1 := sstable.ReadAllRecordsFromTable(currentLevelFiles[i-1])
+		ss2 := sstable.ReadAllRecordsFromTable(currentLevelFiles[i])
+		ss3 := Merge(ss1, ss2)
+
+		sstable.Create(ss3, current_level+1)
+		sstable.Delete(currentLevelFiles[i-1])
+		sstable.Delete(currentLevelFiles[i])
 	}
 
 	if current_level+1 != int(config.Values.Lsm.MaxLevel) {

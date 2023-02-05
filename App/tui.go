@@ -3,17 +3,19 @@ package App
 import (
 	"fmt"
 
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/compaction"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/lru"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/memtable"
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/tokenBucket"
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/wal"
 )
 
 // TODO: Add Range Scan and Get List options
 func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.TokenBucket) {
 	var isRunning = true
-	// for _, v := range wal.ReadWal() {
-	// 	HandleAdd(v.Key, v.Value, memtable, LRU)
-	// }
+	for _, v := range wal.ReadWal() {
+		HandleAdd(v.Key, v.Value, memtable, LRU)
+	}
 	for isRunning {
 		printMenu()
 		println("Select option: ")
@@ -56,6 +58,7 @@ func TUI(memtable *memtable.Memtable, LRU *lru.LRUCache, token *tokenBucket.Toke
 			// HandleDelete(key, memtable, LRU)
 		case "4":
 			println("Compact")
+			compaction.SizeTierCompaction(1)
 		case "5":
 			isRunning = false
 		default:

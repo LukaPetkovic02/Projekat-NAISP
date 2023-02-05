@@ -3,7 +3,6 @@ package sstable
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"os"
 
 	"github.com/LukaPetkovicSV16/Projekat-NAISP/config"
@@ -22,11 +21,11 @@ type Summary struct {
 
 func CreateSummary(listOfRecords []types.Record, initialOffset uint64) Summary {
 	var indexes = CreateIndexes(listOfRecords, initialOffset)
-	fmt.Println("indexes: ", indexes)
+	// fmt.Println("indexes: ", indexes)
 	var summaryIndexes = make([]Index, 0)
 	var additionalOffset uint64 = 0
 	if config.Values.Structure == "single-file" {
-		fmt.Println("single-file")
+		// fmt.Println("single-file")
 		additionalOffset += 16 + uint64(len(indexes[0].Key)) + uint64(len(indexes[len(indexes)-1].Key))
 
 		for i := 0; i < len(indexes); i++ {
@@ -34,7 +33,7 @@ func CreateSummary(listOfRecords []types.Record, initialOffset uint64) Summary {
 				additionalOffset += uint64(len(indexes[i].Serialize()))
 			}
 		}
-		fmt.Println("additional offset: ", additionalOffset)
+		// fmt.Println("additional offset: ", additionalOffset)
 	}
 	var indexOffset uint64 = initialOffset + additionalOffset
 	for i := 0; i < len(indexes); i++ {

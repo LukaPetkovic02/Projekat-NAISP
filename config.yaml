@@ -10,7 +10,7 @@ skipList:
 btree:
   maxNode: 2
 lsm:
-  maxLevel: 5
+  maxLevel: 3
 tokenBucket:
   size: 10
   rate: 1000

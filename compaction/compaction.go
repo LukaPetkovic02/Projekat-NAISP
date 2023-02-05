@@ -1,13 +1,15 @@
 package compaction
 
-import "github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+import (
+	"github.com/LukaPetkovicSV16/Projekat-NAISP/types"
+)
 
 // spaja dve liste rekorda u novu
 func Merge(sstable1 []types.Record, sstable2 []types.Record) []types.Record {
 	var i int = 0
 	var j int = 0
 	var ret []types.Record
-	for i < len(sstable1) && j < len(sstable2) {
+	for i < len(sstable1) || j < len(sstable2) {
 
 		if i == len(sstable1) {
 			ret = append(ret, sstable2[j])
